@@ -32,8 +32,11 @@ struct FInv_SlotAvailability
 	{
 	}
 
+	/** 格子索引 */
 	int32 Index{INDEX_NONE};
+	/** 该格子要填充的物品数量 */
 	int32 AmountToFill{0};
+	/** 格子中是否已有物品 */
 	bool bItemAtIndex{false};
 };
 
@@ -49,9 +52,14 @@ struct FInv_SlotAvailabilityResult
 	{
 	}
 
+	/** 指向物品栏中已有的物品 */
 	TWeakObjectPtr<UInv_InventoryItem> Item;
-	int32 TotalRoomToFill{0};
+	/** 当前可以放入的该物品数量 */
+	int32  TotalRoomToFill{0};
+	/** 无法放入的物品数量 */
 	int32 Remainder{0};
+	/** 是否可堆叠 */
 	bool bStackable{false};
+	/** 具体格子的数据集合 */
 	TArray<FInv_SlotAvailability> SlotAvailabilities;
 };
