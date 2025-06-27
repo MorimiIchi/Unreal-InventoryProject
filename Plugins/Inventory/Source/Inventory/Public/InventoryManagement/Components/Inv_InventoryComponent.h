@@ -39,6 +39,7 @@ private:
 
 	TWeakObjectPtr<APlayerController> OwningController;
 
+	/** Widget */
 	UPROPERTY()
 	TObjectPtr<UInv_InventoryBase> InventoryMenu;
 
