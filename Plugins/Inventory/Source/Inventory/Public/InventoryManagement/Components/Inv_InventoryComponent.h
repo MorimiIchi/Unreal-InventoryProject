@@ -25,7 +25,30 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category="Inventory")
 	void TryAddItem(UInv_ItemComponent* ItemComponent);
 
-	void ToggleInventory();
+	//--------------------------------
+	// RPC 属性解释
+	// Server：指定该函数在服务器上执行。客户端调用时，RPC 请求会从客户端发送到服务器，并在服务器端运行对应逻辑。
+	// Reliable：确保 RPC 调用的可靠性，保证消息不会丢失或乱序，适用于对一致性要求高的关键操作。
+	//-------------------------------
+
+	/**
+	 * 新增物品到库存（不存在时）
+	 * @param ItemComponent 待添加的物品组件
+	 * @param StackCount 本次添加的物品数量。
+	 */
+	UFUNCTION(Server, Reliable)
+	void Server_AddNewItem(UInv_ItemComponent* ItemComponent, int32 StackCount);
+
+	/**
+	 * 增加已有物品堆叠数量（存在时）
+	 * @param ItemComponent 待添加的物品组件
+	 * @param StackCount 本次添加的物品数量
+	 * @param Remainder （仅限堆叠情况）未能放入库存的剩余物品数量，用于决定是否保留或销毁剩余的拾取物。
+	 */
+	UFUNCTION(Server, Reliable)
+	void Server_AddStacksToItem(UInv_ItemComponent* ItemComponent, int32 StackCount, int32 Remainder);
+
+	void ToggleInventoryMenu();
 
 	FInventoryItemChange OnItemAdded;
 	FInventoryItemChange OnItemRemoved;

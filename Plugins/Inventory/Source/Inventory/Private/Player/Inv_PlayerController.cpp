@@ -28,7 +28,7 @@ void AInv_PlayerController::Tick(float DeltaSeconds)
 void AInv_PlayerController::ToggleInventory()
 {
 	if (!InventoryComponent.IsValid()) return;
-	InventoryComponent->ToggleInventory();
+	InventoryComponent->ToggleInventoryMenu();
 }
 
 void AInv_PlayerController::BeginPlay()

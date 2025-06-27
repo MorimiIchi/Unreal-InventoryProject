@@ -19,10 +19,31 @@ void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
 		return;
 	}
 
-	// @todo: Actually add the item to the inventory
+	// 添加道具到道具栏中
+	if (Result.Item.IsValid() && Result.bStackable)
+	{
+		// 为已经存在于道具栏中的单格道具添加叠加数量
+		// 请求服务器添加堆叠
+		Server_AddStacksToItem(ItemComponent, Result.TotalRoomToFill, Result.Remainder);
+	}
+	else if (Result.TotalRoomToFill > 0)
+	{
+		// 道具栏里并不存在该类道具，找一个空格子创建一个新的道具
+		// 请求服务器添加道具
+		Server_AddNewItem(ItemComponent, Result.bStackable ? Result.TotalRoomToFill : 0);
+	}
 }
 
-void UInv_InventoryComponent::ToggleInventory()
+void UInv_InventoryComponent::Server_AddNewItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount)
+{
+}
+
+void UInv_InventoryComponent::Server_AddStacksToItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount,
+                                                                    int32 Remainder)
+{
+}
+
+void UInv_InventoryComponent::ToggleInventoryMenu()
 {
 	if (bInventoryMenuOpen)
 	{
