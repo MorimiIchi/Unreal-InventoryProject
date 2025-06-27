@@ -55,7 +55,13 @@ public:
 
 	void ToggleInventoryMenu();
 
-	/** 实现 AddRepSubObject 方法来管理复制的子对象（新创建的InventoryItem） */
+	/**
+	 * 实现 AddRepSubObject 方法来管理复制的子对象（新创建的InventoryItem）。
+	 * 我们开启了“显式注册子对象”模式，关闭了默认模式，所以需要提供一个函数供为组件添加子对象的业务调用，显示添加子对象。
+	 * 默认模式会对组件里所有 UPROPERTY 指针做一次递归扫描，找出潜在的子对象并复制；
+	 * 当子对象数量可能频繁增减（背包格子、装备栏等）时，这种扫描既慢也容易漏掉运行时动态创建的对象。
+	 * 显式模式能 按需、精准地复制，同时避免不必要的网络带宽浪费。
+	 */
 	void AddRepSubObj(UObject* SubObj);
 
 	FInventoryItemChange OnItemAdded;
