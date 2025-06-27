@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "InventoryManagement/FastArray/Inv_FastArray.h"
 #include "Inv_InventoryComponent.generated.h"
 
 class UInv_ItemComponent;
@@ -14,6 +15,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryItemChange, UInv_Inventory
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FNoRoomInInventory);
 
+/**
+ * InventoryComponent负责管理物品列表，并通过FastArraySerializer（快速数组序列化器）管理网络复制。
+ */
 UCLASS(ClassGroup=(Inventory), meta=(BlueprintSpawnableComponent), Blueprintable)
 class INVENTORY_API UInv_InventoryComponent : public UActorComponent
 {
@@ -21,6 +25,7 @@ class INVENTORY_API UInv_InventoryComponent : public UActorComponent
 
 public:
 	UInv_InventoryComponent();
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category="Inventory")
 	void TryAddItem(UInv_ItemComponent* ItemComponent);
@@ -50,6 +55,9 @@ public:
 
 	void ToggleInventoryMenu();
 
+	/** 实现 AddRepSubObject 方法来管理复制的子对象（新创建的InventoryItem） */
+	void AddRepSubObj(UObject* SubObj);
+
 	FInventoryItemChange OnItemAdded;
 	FInventoryItemChange OnItemRemoved;
 	FNoRoomInInventory NoRoomInInventory;
@@ -59,6 +67,9 @@ protected:
 
 private:
 	void ConstructInventory();
+
+	UPROPERTY(Replicated)
+	FInv_InventoryFastArray InventoryList;
 
 	TWeakObjectPtr<APlayerController> OwningController;
 

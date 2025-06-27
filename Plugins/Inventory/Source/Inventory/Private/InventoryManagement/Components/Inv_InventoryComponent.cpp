@@ -2,12 +2,26 @@
 
 
 #include "InventoryManagement/Components/Inv_InventoryComponent.h"
+
+#include "Net/UnrealNetwork.h"
 #include  "Widgets/Inventory/InventoryBase/Inv_InventoryBase.h"
 
 
 UInv_InventoryComponent::UInv_InventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	// 为了网络复制：组件需启用SetIsReplicatedByDefault和bReplicateUsingRegisteredSubobjectList。
+	SetIsReplicatedByDefault(true);
+	bReplicateUsingRegisteredSubObjectList = true;
+
+	bInventoryMenuOpen = false;
+}
+
+void UInv_InventoryComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, InventoryList);
 }
 
 void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
@@ -36,6 +50,9 @@ void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
 
 void UInv_InventoryComponent::Server_AddNewItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount)
 {
+	UInv_InventoryItem* NewItem = InventoryList.AddEntry(ItemComponent);
+
+	// 通知 Item Component 销毁自己的 Owner Actor
 }
 
 void UInv_InventoryComponent::Server_AddStacksToItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount,
@@ -52,6 +69,14 @@ void UInv_InventoryComponent::ToggleInventoryMenu()
 	else
 	{
 		OpenInventoryMenu();
+	}
+}
+
+void UInv_InventoryComponent::AddRepSubObj(UObject* SubObj)
+{
+	if (IsUsingRegisteredSubObjectList() && IsReadyForReplication() && IsValid(SubObj))
+	{
+		AddReplicatedSubObject(SubObj);
 	}
 }
 
