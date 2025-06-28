@@ -40,7 +40,7 @@ public:
 	{
 	}
 
-	FInv_InventoryFastArray(UActorComponent* InOwnerComponent): OwnerComponent(InOwnerComponent)
+	FInv_InventoryFastArray(UActorComponent* InOwnerComponent) : OwnerComponent(InOwnerComponent)
 	{
 	}
 

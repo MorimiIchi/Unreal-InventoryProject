@@ -7,6 +7,7 @@
 #include "Types/Inv_GridTypes.h"
 #include "Inv_InventoryGrid.generated.h"
 
+class UInv_InventoryComponent;
 class UCanvasPanel;
 class UInv_GridSlot;
 /**
@@ -24,6 +25,12 @@ public:
 
 private:
 	void ConstructGrid();
+	bool MatchesCategory(UInv_InventoryItem* Item);
+
+	UFUNCTION()
+	void AddItem(UInv_InventoryItem* Item);
+
+	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UCanvasPanel> CanvasPanel;
