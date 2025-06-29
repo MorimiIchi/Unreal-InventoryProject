@@ -56,6 +56,12 @@ struct FInv_ImageFragment : public FInv_ItemFragment
 {
 	GENERATED_BODY()
 
+public:
+	UTexture2D* GetIcon() const { return Icon; }
+	void SetIcon(UTexture2D* InIcon) { this->Icon = InIcon; }
+	FVector2D GetIconDimensions() const { return IconDimensions; }
+	void SetIconDimensions(const FVector2D& InIconDimensions) { this->IconDimensions = InIconDimensions; }
+
 private:
 	UPROPERTY(EditAnywhere, Category="Inventory")
 	TObjectPtr<UTexture2D> Icon{nullptr};
