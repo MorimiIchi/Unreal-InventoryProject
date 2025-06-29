@@ -18,10 +18,5 @@ class INVENTORY_API UInv_InventoryBase : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	virtual FInv_SlotAvailabilityResult HasRoomForItem(UInv_ItemComponent* ItemComponent) const
-	{
-		FInv_SlotAvailabilityResult Result;
-		Result.TotalRoomToFill = 1;
-		return Result;
-	};
+	virtual FInv_SlotAvailabilityResult HasRoomForItem(UInv_ItemComponent* ItemComponent) const;
 };
