@@ -25,6 +25,8 @@ struct FInv_ItemFragment
 	{
 	}
 
+	FGameplayTag GetFragmentTag() const { return FragmentTag; }
+
 private:
 	UPROPERTY(EditAnywhere, Category="Inventory")
 	FGameplayTag FragmentTag = FGameplayTag::EmptyTag;

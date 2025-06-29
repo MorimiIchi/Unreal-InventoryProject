@@ -33,6 +33,7 @@ private:
 	void ConstructGrid();
 	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_InventoryItem* Item);
 	FInv_SlotAvailabilityResult HasRoomForItem(const FInv_ItemManifest& Manifest);
+	void AddItemToIndices(const FInv_SlotAvailabilityResult& Result, UInv_InventoryItem* NewItem);
 	bool MatchesCategory(UInv_InventoryItem* Item);
 	
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
