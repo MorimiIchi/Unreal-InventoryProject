@@ -10,6 +10,8 @@
  * 引入 ItemManifest 结构体用于存储创建新物品时需要的所有信息（如物品类型、分类等）。
  */
 
+struct FInv_ItemFragment;
+
 USTRUCT(BlueprintType)
 struct INVENTORY_API FInv_ItemManifest
 {
@@ -24,6 +26,9 @@ public:
 	FGameplayTag GetItemType() const { return ItemType; }
 
 private:
+	UPROPERTY(EditAnywhere, Category="Inventory", meta=(ExcludeBaseStruct))
+	TArray<TInstancedStruct<FInv_ItemFragment>> Fragments;
+
 	UPROPERTY(EditAnywhere)
 	EInv_ItemCategory ItemCategory{EInv_ItemCategory::None};
 
