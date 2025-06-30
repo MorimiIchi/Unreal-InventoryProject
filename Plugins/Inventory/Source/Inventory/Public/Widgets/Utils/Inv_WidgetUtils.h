@@ -19,7 +19,9 @@ class INVENTORY_API UInv_WidgetUtils : public UBlueprintFunctionLibrary
 public:
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	static int32 GetIndexFromPosition(const FIntPoint& Position, const int32 Columns);
-
+	
 	UFUNCTION(BlueprintCallable, Category="Inventory")
-	static EInv_ItemCategory GetItemCategoryFromItemComp(UInv_ItemComponent* ItemComponent);
+	static FIntPoint GetPositionFromIndex(const int32 Index,const int32 Columns);
+
+	
 };

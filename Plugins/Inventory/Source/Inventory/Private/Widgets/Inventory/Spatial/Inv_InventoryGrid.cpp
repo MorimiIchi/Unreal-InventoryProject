@@ -26,6 +26,32 @@ void UInv_InventoryGrid::NativeOnInitialized()
 	InventoryComponent->OnItemAdded.AddDynamic(this, &ThisClass::AddItem);
 }
 
+void UInv_InventoryGrid::ConstructGrid()
+{
+	GridSlots.Reserve(Rows * Columns);
+
+	for (int32 j = 0; j < Rows; ++j)
+	{
+		for (int32 i = 0; i < Columns; ++i)
+		{
+			UInv_GridSlot* GridSlot = CreateWidget<UInv_GridSlot>(this, GridSlotClass);
+			CanvasPanel->AddChild(GridSlot);
+
+			// 设置元素的信息
+			FIntPoint TilePosition(i, j);
+			int32 Index = UInv_WidgetUtils::GetIndexFromPosition(TilePosition, Columns);
+			GridSlot->SetTileIndex(Index);
+
+			// 设置布局
+			UCanvasPanelSlot* GridCPS = UWidgetLayoutLibrary::SlotAsCanvasSlot(GridSlot);
+			GridCPS->SetSize(FVector2D(TileSize));
+			GridCPS->SetPosition(TilePosition * TileSize);
+
+			GridSlots.Add(GridSlot);
+		}
+	}
+}
+
 FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const UInv_ItemComponent* ItemComponent)
 {
 	return HasRoomForItem(ItemComponent->GetItemManifest());
@@ -82,8 +108,10 @@ void UInv_InventoryGrid::AddItemAtIndex(UInv_InventoryItem* Item, const int32 In
 		CreateSlottedItem(Item, bStackable, StackAmount, GridFragment, ImageFragment, Index);
 
 	// 将新创建添加到 Canvas Panel
+	AddSlottedItemToCanvas(Index, GridFragment, SlottedItem);
 
 	// 将新创建的 Widget 存储到容器中
+	SlottedItems.Add(Index, SlottedItem);
 }
 
 UInv_SlottedItem* UInv_InventoryGrid::CreateSlottedItem(UInv_InventoryItem* Item, const bool bStackable,
@@ -98,6 +126,16 @@ UInv_SlottedItem* UInv_InventoryGrid::CreateSlottedItem(UInv_InventoryItem* Item
 	return SlottedItem;
 }
 
+void UInv_InventoryGrid::AddSlottedItemToCanvas(const int32 Index, const FInv_GridFragment* GridFragment,
+                                                UInv_SlottedItem* SlottedItem)
+{
+	CanvasPanel->AddChild(SlottedItem);
+	UCanvasPanelSlot* CanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(SlottedItem);
+	CanvasSlot->SetSize(GetDrawSize(GridFragment));
+	const FVector2D DrawPos = UInv_WidgetUtils::GetPositionFromIndex(Index, Columns);
+	const FVector2D DrawPosWithPadding = DrawPos + FVector2D(GridFragment->GetGridPadding());
+	CanvasSlot->SetPosition(DrawPosWithPadding);
+}
 
 void UInv_InventoryGrid::SetSlottedItemImage(const FInv_GridFragment* GridFragment,
                                              const FInv_ImageFragment* ImageFragment,
@@ -115,32 +153,6 @@ FVector2D UInv_InventoryGrid::GetDrawSize(const FInv_GridFragment* GridFragment)
 	const float IconTileWidth = TileSize - GridFragment->GetGridPadding() * 2;
 	FVector2D IconSize = GridFragment->GetGridSize() * IconTileWidth;
 	return IconSize;
-}
-
-void UInv_InventoryGrid::ConstructGrid()
-{
-	GridSlots.Reserve(Rows * Columns);
-
-	for (int32 j = 0; j < Rows; ++j)
-	{
-		for (int32 i = 0; i < Columns; ++i)
-		{
-			UInv_GridSlot* GridSlot = CreateWidget<UInv_GridSlot>(this, GridSlotClass);
-			CanvasPanel->AddChild(GridSlot);
-
-			// 设置元素的信息
-			FIntPoint TilePosition(i, j);
-			int32 Index = UInv_WidgetUtils::GetIndexFromPosition(TilePosition, Columns);
-			GridSlot->SetTileIndex(Index);
-
-			// 设置布局
-			UCanvasPanelSlot* GridCPS = UWidgetLayoutLibrary::SlotAsCanvasSlot(GridSlot);
-			GridCPS->SetSize(FVector2D(TileSize));
-			GridCPS->SetPosition(TilePosition * TileSize);
-
-			GridSlots.Add(GridSlot);
-		}
-	}
 }
 
 bool UInv_InventoryGrid::MatchesCategory(UInv_InventoryItem* Item)

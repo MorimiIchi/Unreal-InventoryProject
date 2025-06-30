@@ -6,8 +6,8 @@
 #include "Inventory.h"
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
+#include "InventoryManagement/Utils/Inv_InventoryStatics.h"
 #include "Widgets/Inventory/Spatial/Inv_InventoryGrid.h"
-#include "Widgets/Utils/Inv_WidgetUtils.h"
 
 void UInv_SpacialInventory::NativeOnInitialized()
 {
@@ -22,7 +22,7 @@ void UInv_SpacialInventory::NativeOnInitialized()
 
 FInv_SlotAvailabilityResult UInv_SpacialInventory::HasRoomForItem(UInv_ItemComponent* ItemComponent) const
 {
-	switch (UInv_WidgetUtils::GetItemCategoryFromItemComp(ItemComponent))
+	switch (UInv_InventoryStatics::GetItemCategoryFromItemComp(ItemComponent))
 	{
 	case EInv_ItemCategory::Equippable:
 		return Grid_Equippables->HasRoomForItem(ItemComponent);

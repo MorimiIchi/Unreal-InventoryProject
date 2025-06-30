@@ -10,8 +10,7 @@ int32 UInv_WidgetUtils::GetIndexFromPosition(const FIntPoint& Position, const in
 	return Position.X + Position.Y * Columns;
 }
 
-EInv_ItemCategory UInv_WidgetUtils::GetItemCategoryFromItemComp(UInv_ItemComponent* ItemComponent)
+FIntPoint UInv_WidgetUtils::GetPositionFromIndex(const int32 Index, const int32 Columns)
 {
-	if (!IsValid(ItemComponent)) return  EInv_ItemCategory::None;
-	return ItemComponent->GetItemManifest().GetItemCategory();
+	return FIntPoint(Index % Columns, Index / Columns);
 }
