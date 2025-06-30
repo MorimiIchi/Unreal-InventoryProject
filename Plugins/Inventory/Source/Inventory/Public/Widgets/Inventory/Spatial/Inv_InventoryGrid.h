@@ -45,6 +45,7 @@ private:
 	                                    const FInv_GridFragment* GridFragment, const FInv_ImageFragment* ImageFragment,
 	                                    const int32 Index);
 	void AddSlottedItemToCanvas(const int32 Index, const FInv_GridFragment* GridFragment, UInv_SlottedItem* SlottedItem);
+	void UpdateGridSlots(UInv_InventoryItem* NewItem, const int32 Index);
 	bool MatchesCategory(UInv_InventoryItem* Item);
 
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
