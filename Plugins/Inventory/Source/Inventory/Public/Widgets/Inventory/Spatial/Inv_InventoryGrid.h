@@ -36,17 +36,17 @@ private:
 	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_InventoryItem* Item);
 	FInv_SlotAvailabilityResult HasRoomForItem(const FInv_ItemManifest& Manifest);
 	void AddItemToIndices(const FInv_SlotAvailabilityResult& Result, UInv_InventoryItem* NewItem);
-	void SetSlottedItemImage(const FInv_GridFragment* GridFragment,
-	                         const FInv_ImageFragment* ImageFragment,
-	                         const UInv_SlottedItem* SlottedItem) const;
+	void SetSlottedItemImage(const UInv_SlottedItem* SlottedItem,
+	                         const FInv_GridFragment* GridFragment,
+	                         const FInv_ImageFragment* ImageFragment) const;
 	FVector2D GetDrawSize(const FInv_GridFragment* GridFragment) const;
 	void AddItemAtIndex(UInv_InventoryItem* Item, const int32 Index, const bool bStackable, const int32 StackAmount);
 	UInv_SlottedItem* CreateSlottedItem(UInv_InventoryItem* Item, const bool bStackable, const int32 StackAmount,
 	                                    const FInv_GridFragment* GridFragment, const FInv_ImageFragment* ImageFragment,
-	                                    const int32 Index);
-	void AddSlottedItemToCanvas(const int32 Index, const FInv_GridFragment* GridFragment, UInv_SlottedItem* SlottedItem);
-	void UpdateGridSlots(UInv_InventoryItem* NewItem, const int32 Index);
-	bool MatchesCategory(UInv_InventoryItem* Item);
+	                                    const int32 Index) const;
+	void AddSlottedItemToCanvas(const int32 Index, const FInv_GridFragment* GridFragment, UInv_SlottedItem* SlottedItem) const;
+	void UpdateGridSlots(const UInv_InventoryItem* NewItem, const int32 Index);
+	bool MatchesCategory(const UInv_InventoryItem* Item) const;
 
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
 
