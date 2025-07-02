@@ -43,29 +43,34 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemMa
 	FInv_SlotAvailabilityResult Result;
 
 	// 确定物品是否可堆叠
+	const FInv_StackableFragment* StackableFragment = Manifest.GetFragmentOfType<FInv_StackableFragment>();
+	Result.bStackable = StackableFragment != nullptr;
+
 	// 确定需要添加的堆叠总数
+	const int32 MaxStackSize = StackableFragment ? StackableFragment->GetMaxStackSize() : 1;
+	int32 AmountToFill = StackableFragment ? StackableFragment->GetStackCount() : 1;
 
 	// 遍历物品栏中的每个格子：
-		// 如果已无剩余堆叠需填充，则提前跳出循环
+	// 如果已无剩余堆叠需填充，则提前跳出循环
 
-		// 判断当前格子是否可用（未被占用）
-		// 判断物品尺寸是否适合当前格子（不会超出网格边界）
-		// 判断当前位置是否已被其他物品占据
+	// 判断当前格子是否可用（未被占用）
+	// 判断物品尺寸是否适合当前格子（不会超出网格边界）
+	// 判断当前位置是否已被其他物品占据
 
-		// 对每个合适位置执行2D范围检查（foreach 2D）：
-			// 确认整个2D范围是否均可用：
-				// - 未超出网格边界
-				// - 不存在其他物品占据的位置
-				// - 若已有物品，需判断：
-				  // - 是否与新物品相同类型
-				  // - 是否已达到最大堆叠数量
+	// 对每个合适位置执行2D范围检查（foreach 2D）：
+	// 确认整个2D范围是否均可用：
+	// - 未超出网格边界
+	// - 不存在其他物品占据的位置
+	// - 若已有物品，需判断：
+	// - 是否与新物品相同类型
+	// - 是否已达到最大堆叠数量
 
-		// 确认此位置可以填充的具体堆叠数量：
-			// - 若可以堆叠，判断当前堆叠数量与最大堆叠数量之间的差值
-			// - 若无法堆叠或为空位置，使用最大堆叠数量
+	// 确认此位置可以填充的具体堆叠数量：
+	// - 若可以堆叠，判断当前堆叠数量与最大堆叠数量之间的差值
+	// - 若无法堆叠或为空位置，使用最大堆叠数量
 
-		// 更新剩余需填充的堆叠数量
-		// 记录此位置的具体填充信息（索引、堆叠数量、是否已有物品等）
+	// 更新剩余需填充的堆叠数量
+	// 记录此位置的具体填充信息（索引、堆叠数量、是否已有物品等）
 
 	// 循环结束后，确认剩余未填充数量（若有）
 
