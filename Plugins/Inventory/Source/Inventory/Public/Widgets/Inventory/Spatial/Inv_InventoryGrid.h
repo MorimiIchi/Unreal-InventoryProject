@@ -44,9 +44,9 @@ private:
 	UInv_SlottedItem* CreateSlottedItem(UInv_InventoryItem* Item, const bool bStackable, const int32 StackAmount,
 	                                    const FInv_GridFragment* GridFragment, const FInv_ImageFragment* ImageFragment,
 	                                    const int32 Index) const;
-	/**  */
 	void AddSlottedItemToCanvas(const int32 Index, const FInv_GridFragment* GridFragment, UInv_SlottedItem* SlottedItem) const;
 	void UpdateGridSlots(UInv_InventoryItem* NewItem, const int32 Index, bool bStaclableItem, int32 StackAmount);
+	bool IsIndexClaimed(const TSet<int32>& Indices, const int32 Index) const;
 	bool MatchesCategory(const UInv_InventoryItem* Item) const;
 
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
