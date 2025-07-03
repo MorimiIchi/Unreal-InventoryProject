@@ -64,7 +64,7 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemMa
 		// 判断物品尺寸是否适合当前格子（不会超出网格边界）
 		TSet<int32> TentativelyClaimed;
 		if (!HasRoomAtIndex(GridSlot, GetItemDimensions(Manifest), CheckedIndices, TentativelyClaimed,
-		                    Manifest.GetItemType()))
+		                    Manifest.GetItemType(), MaxStackSize))
 		{
 			continue;
 		}
@@ -80,7 +80,7 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemMa
 
 bool UInv_InventoryGrid::HasRoomAtIndex(const UInv_GridSlot* GridSlot, const FIntPoint& Dimensions,
                                         const TSet<int32>& CheckedIndices, TSet<int32>& OutTentativelyClaimed,
-                                        const FGameplayTag& ItemType)
+                                        const FGameplayTag& ItemType, const int32 StackMaxSize)
 {
 	bool bHasRoomAtIndex = true;
 
@@ -89,7 +89,8 @@ bool UInv_InventoryGrid::HasRoomAtIndex(const UInv_GridSlot* GridSlot, const FIn
 	UInv_InventoryStatics::ForEach2D(
 		GridSlots, GridSlot->GetTileIndex(), Dimensions, Columns, [&](const UInv_GridSlot* SubGridSlot)
 		{
-			if (CheckSlotConstraints(GridSlot, SubGridSlot, CheckedIndices, OutTentativelyClaimed, ItemType))
+			if (CheckSlotConstraints(GridSlot, SubGridSlot, CheckedIndices, OutTentativelyClaimed, ItemType,
+			                         StackMaxSize))
 			{
 				// 如果当前格子可以给道具使用，就把它加入到计划要占据的网格片当中
 				OutTentativelyClaimed.Add(SubGridSlot->GetTileIndex());
@@ -105,7 +106,7 @@ bool UInv_InventoryGrid::HasRoomAtIndex(const UInv_GridSlot* GridSlot, const FIn
 
 bool UInv_InventoryGrid::CheckSlotConstraints(const UInv_GridSlot* GridSlot, const UInv_GridSlot* SubGridSlot,
                                               const TSet<int32>& CheckedIndices, TSet<int32>& OutTentativelyClaimed,
-                                              const FGameplayTag& ItemType) const
+                                              const FGameplayTag& ItemType, const int32 StackMaxSize) const
 {
 	//---------------------------------------------------------//
 	// 这个函数进行的检查都是针对道具要占用的每一个网格进行的，
@@ -139,7 +140,9 @@ bool UInv_InventoryGrid::CheckSlotConstraints(const UInv_GridSlot* GridSlot, con
 	if (!DoesItemTypeMatch(SubItem, ItemType)) return false;
 
 	// 如果可堆叠，是否已经达到了堆叠上限？
-	return false;
+	if (GridSlot->GetStackCount() >= StackMaxSize) return false;
+
+	return true;
 }
 
 FIntPoint UInv_InventoryGrid::GetItemDimensions(const FInv_ItemManifest& Manifest) const

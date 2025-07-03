@@ -52,10 +52,10 @@ private:
 	void UpdateGridSlots(UInv_InventoryItem* NewItem, const int32 Index, bool bStaclableItem, int32 StackAmount);
 	bool IsIndexClaimed(const TSet<int32>& Indices, const int32 Index) const;
 	bool HasRoomAtIndex(const UInv_GridSlot* GridSlot, const FIntPoint& Dimensions, const TSet<int32>& CheckedIndices,
-	                    TSet<int32>& OutTentativelyClaimed, const FGameplayTag& ItemType);
+	                    TSet<int32>& OutTentativelyClaimed, const FGameplayTag& ItemType, const int32 StackMaxSize);
 	bool CheckSlotConstraints(const UInv_GridSlot* GridSlot, const UInv_GridSlot* SubGridSlot,
 	                          const TSet<int32>& CheckedIndices, TSet<int32>& OutTentativelyClaimed,
-	                          const FGameplayTag& ItemType) const;
+	                          const FGameplayTag& ItemType, const int32 StackMaxSize) const;
 	FIntPoint GetItemDimensions(const FInv_ItemManifest& Manifest) const;
 	bool HasValidItem(const UInv_GridSlot* GridSlot) const;
 	bool IsUpperLeftSlot(const UInv_GridSlot* GridSlot, const UInv_GridSlot* SubGridSlot) const;
