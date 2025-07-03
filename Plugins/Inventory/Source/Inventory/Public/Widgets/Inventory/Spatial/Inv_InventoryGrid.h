@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Items/Fragments/Inv_ItemFragment.h"
+#include "Items/Manifest/Inv_ItemManifest.h"
 #include "Types/Inv_GridTypes.h"
+#include "Widgets/Inventory/GridSlots/Inv_GridSlot.h"
 #include "Inv_InventoryGrid.generated.h"
 
 class UInv_SlottedItem;
@@ -44,9 +46,16 @@ private:
 	UInv_SlottedItem* CreateSlottedItem(UInv_InventoryItem* Item, const bool bStackable, const int32 StackAmount,
 	                                    const FInv_GridFragment* GridFragment, const FInv_ImageFragment* ImageFragment,
 	                                    const int32 Index) const;
-	void AddSlottedItemToCanvas(const int32 Index, const FInv_GridFragment* GridFragment, UInv_SlottedItem* SlottedItem) const;
+	void AddSlottedItemToCanvas(const int32 Index, const FInv_GridFragment* GridFragment,
+	                            UInv_SlottedItem* SlottedItem) const;
 	void UpdateGridSlots(UInv_InventoryItem* NewItem, const int32 Index, bool bStaclableItem, int32 StackAmount);
 	bool IsIndexClaimed(const TSet<int32>& Indices, const int32 Index) const;
+	bool HasRoomAtIndex(const UInv_GridSlot* GridSlot, const FIntPoint& Dimensions, const TSet<int32>& CheckedIndices,
+	                    TSet<int32>& OutTentativelyClaimed);
+	bool CheckSlotConstraints(const UInv_GridSlot* GridSlot, const UInv_GridSlot* SubGridSlot, const TSet<int32>& CheckedIndices, TSet<int32>& OutTentativelyClaimed) const;
+	FIntPoint GetItemDimensions(const FInv_ItemManifest& Manifest) const;
+	bool HasValidItem(const UInv_GridSlot* GridSlot) const;
+	bool IsUpperLeftSlot(const UInv_GridSlot* GridSlot, const UInv_GridSlot* SubGridSlot) const;
 	bool MatchesCategory(const UInv_InventoryItem* Item) const;
 
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;

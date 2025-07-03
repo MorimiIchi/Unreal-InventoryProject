@@ -61,19 +61,12 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemMa
 		if (IsIndexClaimed(CheckedIndices, GridSlot->GetTileIndex())) continue;
 
 		// 判断物品尺寸是否适合当前格子（不会超出网格边界）
-		// 判断当前位置是否已被其他物品占据
-
-		// 对每个合适位置执行2D范围检查（foreach 2D）：
-		// 确认整个2D范围是否均可用：
-		// - 未超出网格边界
-		// - 不存在其他物品占据的位置
-		// - 若已有物品，需判断：
-		// - 是否与新物品相同类型
-		// - 是否已达到最大堆叠数量
-
-		// 确认此位置可以填充的具体堆叠数量：
-		// - 若可以堆叠，判断当前堆叠数量与最大堆叠数量之间的差值
-		// - 若无法堆叠或为空位置，使用最大堆叠数量
+		TSet<int32> TentativelyClaimed;
+		if (!HasRoomAtIndex(GridSlot, GetItemDimensions(Manifest), CheckedIndices, TentativelyClaimed))
+		{
+			continue;
+		}
+		CheckedIndices.Append(TentativelyClaimed);
 
 		// 更新剩余需填充的堆叠数量
 		// 记录此位置的具体填充信息（索引、堆叠数量、是否已有物品等）
@@ -81,6 +74,71 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemMa
 	// 循环结束后，确认剩余未填充数量（若有）
 
 	return Result;
+}
+
+bool UInv_InventoryGrid::HasRoomAtIndex(const UInv_GridSlot* GridSlot, const FIntPoint& Dimensions,
+                                        const TSet<int32>& CheckedIndices, TSet<int32>& OutTentativelyClaimed)
+{
+	bool bHasRoomAtIndex = true;
+
+	// 对每个合适位置执行2D范围检查（foreach 2D），检查其它的重要条件。
+	// SubGrid: 道具占据的每一个格子。这里是因为已经传入的用于获取索引的格子参数被命名为 GridSlot，所以我们把 ForEach2D 遍历的每一个格子叫做 SubGridSlot。
+	UInv_InventoryStatics::ForEach2D(
+		GridSlots, GridSlot->GetTileIndex(), Dimensions, Columns, [&](const UInv_GridSlot* SubGridSlot)
+		{
+			if (CheckSlotConstraints(GridSlot, SubGridSlot, CheckedIndices, OutTentativelyClaimed))
+			{
+				OutTentativelyClaimed.Add(SubGridSlot->GetTileIndex());
+			}
+			else
+			{
+				bHasRoomAtIndex = false;
+			}
+		});
+
+	return bHasRoomAtIndex;
+}
+
+bool UInv_InventoryGrid::CheckSlotConstraints(const UInv_GridSlot* GridSlot, const UInv_GridSlot* SubGridSlot,
+                                              const TSet<int32>& CheckedIndices,
+                                              TSet<int32>& OutTentativelyClaimed) const
+{
+	// Index 被声称了吗？
+	if (IsIndexClaimed(CheckedIndices, SubGridSlot->GetTileIndex())) return false;
+
+	// Item 可用吗？
+	if (!HasValidItem(SubGridSlot))
+	{
+		OutTentativelyClaimed.Add(SubGridSlot->GetTileIndex());
+		return true;
+	}
+
+	// 这是一个 Upper Left Slot 吗？
+	// 对于可堆叠的多格物品（比如 2×2 大小的药水），堆叠时只允许在该物品占用区域的上左方格（authoritative slot）进行：
+	// 如果在其它子格执行堆叠，会导致图标部分重叠，且实际上只是累加计数，不会生成新的 Widget。
+	// 因此，只有当子格正好是该已有物品的“上左”起始格时，才允许进行堆叠检查。
+	if (!IsUpperLeftSlot(GridSlot, SubGridSlot)) return false;
+
+	// 类型与我们要添加的道具的类型相同吗？
+	// 是可堆叠道具吗？
+	// 如果可堆叠，是否已经达到了堆叠上限？
+	return false;
+}
+
+FIntPoint UInv_InventoryGrid::GetItemDimensions(const FInv_ItemManifest& Manifest) const
+{
+	const FInv_GridFragment* GridFragment = Manifest.GetFragmentOfType<FInv_GridFragment>();
+	return GridFragment ? GridFragment->GetGridSize() : FIntPoint(1, 1);
+}
+
+bool UInv_InventoryGrid::HasValidItem(const UInv_GridSlot* GridSlot) const
+{
+	return GridSlot->GetInventoryItem().IsValid();
+}
+
+bool UInv_InventoryGrid::IsUpperLeftSlot(const UInv_GridSlot* GridSlot, const UInv_GridSlot* SubGridSlot) const
+{
+	return SubGridSlot->GetUpperLeftIndex() == GridSlot->GetTileIndex();
 }
 
 void UInv_InventoryGrid::AddItem(UInv_InventoryItem* Item)
