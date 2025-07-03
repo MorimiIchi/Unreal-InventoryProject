@@ -58,11 +58,13 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemMa
 		if (AmountToFill == 0) break;
 
 		// 判断当前格子是否可用（未被占用）
+		// 这一层只看“锚点”(UpperLeft）是否可用，并不会对道具占据的网格片区做检查，只能算是一次外部的快速检查。
 		if (IsIndexClaimed(CheckedIndices, GridSlot->GetTileIndex())) continue;
 
 		// 判断物品尺寸是否适合当前格子（不会超出网格边界）
 		TSet<int32> TentativelyClaimed;
-		if (!HasRoomAtIndex(GridSlot, GetItemDimensions(Manifest), CheckedIndices, TentativelyClaimed))
+		if (!HasRoomAtIndex(GridSlot, GetItemDimensions(Manifest), CheckedIndices, TentativelyClaimed,
+		                    Manifest.GetItemType()))
 		{
 			continue;
 		}
@@ -77,7 +79,8 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemMa
 }
 
 bool UInv_InventoryGrid::HasRoomAtIndex(const UInv_GridSlot* GridSlot, const FIntPoint& Dimensions,
-                                        const TSet<int32>& CheckedIndices, TSet<int32>& OutTentativelyClaimed)
+                                        const TSet<int32>& CheckedIndices, TSet<int32>& OutTentativelyClaimed,
+                                        const FGameplayTag& ItemType)
 {
 	bool bHasRoomAtIndex = true;
 
@@ -86,8 +89,9 @@ bool UInv_InventoryGrid::HasRoomAtIndex(const UInv_GridSlot* GridSlot, const FIn
 	UInv_InventoryStatics::ForEach2D(
 		GridSlots, GridSlot->GetTileIndex(), Dimensions, Columns, [&](const UInv_GridSlot* SubGridSlot)
 		{
-			if (CheckSlotConstraints(GridSlot, SubGridSlot, CheckedIndices, OutTentativelyClaimed))
+			if (CheckSlotConstraints(GridSlot, SubGridSlot, CheckedIndices, OutTentativelyClaimed, ItemType))
 			{
+				// 如果当前格子可以给道具使用，就把它加入到计划要占据的网格片当中
 				OutTentativelyClaimed.Add(SubGridSlot->GetTileIndex());
 			}
 			else
@@ -100,15 +104,22 @@ bool UInv_InventoryGrid::HasRoomAtIndex(const UInv_GridSlot* GridSlot, const FIn
 }
 
 bool UInv_InventoryGrid::CheckSlotConstraints(const UInv_GridSlot* GridSlot, const UInv_GridSlot* SubGridSlot,
-                                              const TSet<int32>& CheckedIndices,
-                                              TSet<int32>& OutTentativelyClaimed) const
+                                              const TSet<int32>& CheckedIndices, TSet<int32>& OutTentativelyClaimed,
+                                              const FGameplayTag& ItemType) const
 {
-	// Index 被声称了吗？
+	//---------------------------------------------------------//
+	// 这个函数进行的检查都是针对道具要占用的每一个网格进行的，
+	// 外部进行的检查和这里进行的检查具有不同的意义，
+	// 
+	//---------------------------------------------------------//
+
+	// 格子有被其它道具认领吗？
 	if (IsIndexClaimed(CheckedIndices, SubGridSlot->GetTileIndex())) return false;
 
-	// Item 可用吗？
+	// 格子上有其它道具吗？
 	if (!HasValidItem(SubGridSlot))
 	{
+		// 没有的话可以先认领
 		OutTentativelyClaimed.Add(SubGridSlot->GetTileIndex());
 		return true;
 	}
@@ -119,8 +130,14 @@ bool UInv_InventoryGrid::CheckSlotConstraints(const UInv_GridSlot* GridSlot, con
 	// 因此，只有当子格正好是该已有物品的“上左”起始格时，才允许进行堆叠检查。
 	if (!IsUpperLeftSlot(GridSlot, SubGridSlot)) return false;
 
-	// 类型与我们要添加的道具的类型相同吗？
 	// 是可堆叠道具吗？
+	// 因为之前确保了当前格子上是有道具的，所以在不可堆叠的情况下要直接返回 false
+	const UInv_InventoryItem* SubItem = SubGridSlot->GetInventoryItem().Get();
+	if (!SubItem->IsStackable()) return false;
+
+	// 类型与我们要添加的道具的类型相同吗？
+	if (!DoesItemTypeMatch(SubItem, ItemType)) return false;
+
 	// 如果可堆叠，是否已经达到了堆叠上限？
 	return false;
 }
@@ -139,6 +156,11 @@ bool UInv_InventoryGrid::HasValidItem(const UInv_GridSlot* GridSlot) const
 bool UInv_InventoryGrid::IsUpperLeftSlot(const UInv_GridSlot* GridSlot, const UInv_GridSlot* SubGridSlot) const
 {
 	return SubGridSlot->GetUpperLeftIndex() == GridSlot->GetTileIndex();
+}
+
+bool UInv_InventoryGrid::DoesItemTypeMatch(const UInv_InventoryItem* SubItem, const FGameplayTag& ItemType) const
+{
+	return SubItem->GetItemManifest().GetItemType().MatchesTagExact(ItemType);
 }
 
 void UInv_InventoryGrid::AddItem(UInv_InventoryItem* Item)
