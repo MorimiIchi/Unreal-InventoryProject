@@ -52,26 +52,48 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemMa
 
 	TSet<int32> CheckedIndices;
 	// 遍历物品栏中的每个格子：
+	// 这一层只看“锚点”(UpperLeft）是否可用，并不会对道具占据的网格片区做检查，只能算是一次外部的快速检查。
 	for (auto& GridSlot : GridSlots)
 	{
 		// 如果已无剩余堆叠需填充，则提前跳出循环
 		if (AmountToFill == 0) break;
 
 		// 判断当前格子是否可用（未被占用）
-		// 这一层只看“锚点”(UpperLeft）是否可用，并不会对道具占据的网格片区做检查，只能算是一次外部的快速检查。
 		if (IsIndexClaimed(CheckedIndices, GridSlot->GetTileIndex())) continue;
 
+		// 判断物品锚点是否在边界中
+		if (!IsInGridBounds(GridSlot->GetTileIndex(), GetItemDimensions(Manifest))) continue;
+
 		// 判断物品尺寸是否适合当前格子（不会超出网格边界）
+		// 这一层里面则是对每个道具占据的格子做判断
 		TSet<int32> TentativelyClaimed;
 		if (!HasRoomAtIndex(GridSlot, GetItemDimensions(Manifest), CheckedIndices, TentativelyClaimed,
 		                    Manifest.GetItemType(), MaxStackSize))
 		{
 			continue;
 		}
-		CheckedIndices.Append(TentativelyClaimed);
 
 		// 更新剩余需填充的堆叠数量
+		const int32 AmountToFillInSlot = DetermineFillAmountForSlot(Result.bStackable, MaxStackSize, AmountToFill,
+		                                                            GridSlot);
+		if (AmountToFill == 0) continue;
+
 		// 记录此位置的具体填充信息（索引、堆叠数量、是否已有物品等）
+		CheckedIndices.Append(TentativelyClaimed);
+		// Update the amount left to fill
+		Result.TotalRoomToFill += AmountToFillInSlot;
+		Result.SlotAvailabilities.Emplace(
+			FInv_SlotAvailability{
+				HasValidItem(GridSlot) ? GridSlot->GetUpperLeftIndex() : GridSlot->GetTileIndex(),
+				Result.bStackable ? AmountToFillInSlot : 0,
+				HasValidItem(GridSlot)
+			}
+		);
+
+		AmountToFill -= AmountToFillInSlot;
+
+		// How much is the Remainder?
+		Result.Remainder = AmountToFill;
 	}
 	// 循环结束后，确认剩余未填充数量（若有）
 
@@ -164,6 +186,37 @@ bool UInv_InventoryGrid::IsUpperLeftSlot(const UInv_GridSlot* GridSlot, const UI
 bool UInv_InventoryGrid::DoesItemTypeMatch(const UInv_InventoryItem* SubItem, const FGameplayTag& ItemType) const
 {
 	return SubItem->GetItemManifest().GetItemType().MatchesTagExact(ItemType);
+}
+
+bool UInv_InventoryGrid::IsInGridBounds(const int32 StartIndex, const FIntPoint& ItemDimensions) const
+{
+	if (StartIndex < 0 || StartIndex >= GridSlots.Num())
+	{
+		return false;
+	}
+
+	const int32 EndColumn = (StartIndex % Columns) + ItemDimensions.X;
+	const int32 EndRow = (StartIndex / Columns) + ItemDimensions.Y;
+	return EndColumn <= Columns && EndRow <= Rows;
+}
+
+int32 UInv_InventoryGrid::DetermineFillAmountForSlot(const bool bStackable, const int32 MaxStackSize,
+                                                     const int32 AmountToFill, const UInv_GridSlot* GridSlot) const
+{
+	const int32 RoomInSlot = MaxStackSize - GetStackAmount(GridSlot);
+	return bStackable ? FMath::Min(AmountToFill, RoomInSlot) : 1;
+}
+
+int32 UInv_InventoryGrid::GetStackAmount(const UInv_GridSlot* GridSlot) const
+{
+	int32 CurrentStackCount = GridSlot->GetStackCount();
+	if (const int32 UpperLeftIndex = GridSlot->GetUpperLeftIndex(); UpperLeftIndex != INDEX_NONE)
+	{
+		UInv_GridSlot* UpperLeftGridSlot = GridSlots[UpperLeftIndex];
+		CurrentStackCount = UpperLeftGridSlot->GetStackCount();
+	}
+
+	return CurrentStackCount;
 }
 
 void UInv_InventoryGrid::AddItem(UInv_InventoryItem* Item)
