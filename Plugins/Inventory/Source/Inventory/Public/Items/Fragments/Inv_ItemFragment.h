@@ -78,6 +78,7 @@ struct FInv_StackableFragment : public FInv_ItemFragment
 public:
 	int32 GetMaxStackSize() const { return MaxStackSize; }
 	int32 GetStackCount() const { return StackCount; }
+	void SetStackCount(const int32 InStackCount) { StackCount = InStackCount; }
 
 private:
 	UPROPERTY(EditAnywhere, Category="Inventory")

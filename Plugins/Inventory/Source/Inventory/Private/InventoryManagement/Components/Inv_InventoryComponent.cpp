@@ -6,6 +6,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Items/Components/Inv_ItemComponent.h"
 #include "Items/Inv_InventoryItem.h"
+#include "Items/Fragments/Inv_ItemFragment.h"
 #include "Widgets/Inventory/InventoryBase/Inv_InventoryBase.h"
 
 
@@ -75,7 +76,13 @@ void UInv_InventoryComponent::Server_AddNewItem_Implementation(UInv_ItemComponen
 		OnItemAdded.Broadcast(NewItem);
 	}
 
-	// @todo: 通知 Item Component 销毁自己的 Owner Actor
+	// 通知 Item Component 销毁自己的 Owner Actor
+	ItemComponent->PickedUp();
+}
+
+void UInv_InventoryComponent::Server_AddStacksToItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount,
+                                                                    int32 Remainder)
+{
 	const FGameplayTag& ItemType = IsValid(ItemComponent)
 		                               ? ItemComponent->GetItemManifest().GetItemType()
 		                               : FGameplayTag::EmptyTag;
@@ -84,13 +91,17 @@ void UInv_InventoryComponent::Server_AddNewItem_Implementation(UInv_ItemComponen
 
 	Item->SetTotalStackCount(Item->GetTotalStackCount() + StackCount);
 
-	// TODO: Destroy the item if the Remainder is zero.
-	// Otherwise, update the stack count for the item pickup. 
-}
-
-void UInv_InventoryComponent::Server_AddStacksToItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount,
-                                                                    int32 Remainder)
-{
+	// 如果全捡光了，就通知 Item Component 销毁自己的 Owner Actor
+	// 不然就修改场景中道具的剩余数量——这里要解决的问题是，必须修改 Fragment，所以必须要拿到一个 Mutable Fragment
+	if (Remainder == 0)
+	{
+		ItemComponent->PickedUp();
+	}
+	else if (FInv_StackableFragment* StackableFragment = ItemComponent->GetItemManifest().GetMutableFragmentOfType<
+		FInv_StackableFragment>())
+	{
+		StackableFragment->SetStackCount(Remainder);
+	}
 }
 
 void UInv_InventoryComponent::ToggleInventoryMenu()
