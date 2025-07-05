@@ -53,6 +53,7 @@ void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
 	if (Result.Item.IsValid() && Result.bStackable)
 	{
 		// 为已经存在于道具栏中的单格道具添加叠加数量
+		OnStackChange.Broadcast(Result);
 		// 请求服务器添加堆叠
 		Server_AddStacksToItem(ItemComponent, Result.TotalRoomToFill, Result.Remainder);
 	}

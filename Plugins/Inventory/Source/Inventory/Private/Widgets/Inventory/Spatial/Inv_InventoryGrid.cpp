@@ -25,6 +25,7 @@ void UInv_InventoryGrid::NativeOnInitialized()
 
 	InventoryComponent = UInv_InventoryStatics::GetInventoryComponent(GetOwningPlayer());
 	InventoryComponent->OnItemAdded.AddDynamic(this, &ThisClass::AddItem);
+	InventoryComponent->OnStackChange.AddDynamic(this, &ThisClass::AddStacks);
 }
 
 
@@ -77,7 +78,7 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemMa
 		const int32 AmountToFillInSlot = DetermineFillAmountForSlot(Result.bStackable, MaxStackSize, AmountToFill,
 		                                                            GridSlot);
 		if (AmountToFill == 0) continue;
-		
+
 		CheckedIndices.Append(TentativelyClaimed);
 
 		// 把当前格子上的信息添加到 Result 中
@@ -94,7 +95,7 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemMa
 
 		// 还有要添加的道具吗？没有就返回结果，有就继续找下一个格子的信息。
 		Result.Remainder = AmountToFill;
-		
+
 		if (AmountToFill == 0) return Result;
 	}
 
@@ -218,6 +219,29 @@ int32 UInv_InventoryGrid::GetStackAmount(const UInv_GridSlot* GridSlot) const
 	}
 
 	return CurrentStackCount;
+}
+
+void UInv_InventoryGrid::AddStacks(const FInv_SlotAvailabilityResult& Result)
+{
+	if (!MatchesCategory(Result.Item.Get())) return;
+
+	for (const auto& SlotAvailability : Result.SlotAvailabilities)
+	{
+		if (SlotAvailability.bItemAtIndex)
+		{
+			const auto& GridSlot = GridSlots[SlotAvailability.Index];
+			const auto& SlottedItem = SlottedItems.FindChecked(SlotAvailability.Index);
+			SlottedItem->UpdateStackCount(GridSlot->GetStackCount() + SlotAvailability.AmountToFill);
+			GridSlot->SetStackCount(GridSlot->GetStackCount() + SlotAvailability.AmountToFill);
+		}
+		// 这个 else 是针对没有任何道具的 Index 的
+		else
+		{
+			AddItemAtIndex(Result.Item.Get(), SlotAvailability.Index, Result.bStackable, SlotAvailability.AmountToFill);
+			UpdateGridSlots(Result.Item.Get(), SlotAvailability.Index, Result.bStackable,
+			                SlotAvailability.AmountToFill);
+		}
+	}
 }
 
 void UInv_InventoryGrid::AddItem(UInv_InventoryItem* Item)
