@@ -38,6 +38,7 @@ private:
 	void ConstructGrid();
 	bool MatchesCategory(const UInv_InventoryItem* Item) const;
 	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_InventoryItem* Item);
+	/** 在道具栏中查找所有可以给要添加的道具用的格子 */
 	FInv_SlotAvailabilityResult HasRoomForItem(const FInv_ItemManifest& Manifest);
 	void AddItemToIndices(const FInv_SlotAvailabilityResult& Result, UInv_InventoryItem* NewItem);
 	void SetSlottedItemImage(const UInv_SlottedItem* SlottedItem,
@@ -62,7 +63,8 @@ private:
 	bool IsUpperLeftSlot(const UInv_GridSlot* GridSlot, const UInv_GridSlot* SubGridSlot) const;
 	bool DoesItemTypeMatch(const UInv_InventoryItem* SubItem, const FGameplayTag& ItemType) const;
 	bool IsInGridBounds(const int32 StartIndex, const FIntPoint& ItemDimensions) const;
-	int32 DetermineFillAmountForSlot(const bool bStackable, const int32 MaxStackSize, const int32 AmountToFill, const UInv_GridSlot* GridSlot) const;
+	int32 DetermineFillAmountForSlot(const bool bStackable, const int32 MaxStackSize, const int32 AmountToFill,
+	                                 const UInv_GridSlot* GridSlot) const;
 	int32 GetStackAmount(const UInv_GridSlot* GridSlot) const;
 
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;

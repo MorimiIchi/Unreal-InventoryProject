@@ -8,7 +8,7 @@
 #include "Inv_InventoryItem.generated.h"
 
 /**
- * 
+ * 这个道具类会放在 FastArray 里面用
  */
 UCLASS()
 class INVENTORY_API UInv_InventoryItem : public UObject
@@ -27,6 +27,8 @@ public:
 	const FInv_ItemManifest& GetItemManifest() const { return ItemManifest.Get<FInv_ItemManifest>(); }
 	FInv_ItemManifest& GetMutableManifest() { return ItemManifest.GetMutable<FInv_ItemManifest>(); }
 	bool IsStackable() const;
+	int32 GetTotalStackCount() const { return TotalStackCount; }
+	void SetTotalStackCount(int32 Count) { TotalStackCount = Count; }
 
 private:
 	/**
@@ -35,6 +37,9 @@ private:
 	 */
 	UPROPERTY(VisibleAnywhere, meta=(BaseStruct="/Script/Inventory.Inv_ItemManifest"), Replicated)
 	FInstancedStruct ItemManifest;
+
+	UPROPERTY(Replicated)
+	int32 TotalStackCount{0};
 };
 
 template <typename FragmentType>
@@ -45,4 +50,3 @@ const FragmentType* GetFragment(const UInv_InventoryItem* Item, const FGameplayT
 	const FInv_ItemManifest& Manifest = Item->GetItemManifest();
 	return Manifest.GetFragmentOfTypeWithTag<FragmentType>(Tag);
 }
-

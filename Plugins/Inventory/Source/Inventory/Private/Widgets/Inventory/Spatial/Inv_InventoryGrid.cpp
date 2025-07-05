@@ -58,7 +58,7 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemMa
 		// 如果已无剩余堆叠需填充，则提前跳出循环
 		if (AmountToFill == 0) break;
 
-		// 判断当前格子是否可用（未被占用）
+		// 判断当前格子是否已被认领
 		if (IsIndexClaimed(CheckedIndices, GridSlot->GetTileIndex())) continue;
 
 		// 判断物品锚点是否在边界中
@@ -73,14 +73,14 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemMa
 			continue;
 		}
 
-		// 更新剩余需填充的堆叠数量
+		// 确认当前格子可以填多少数量的堆叠
 		const int32 AmountToFillInSlot = DetermineFillAmountForSlot(Result.bStackable, MaxStackSize, AmountToFill,
 		                                                            GridSlot);
 		if (AmountToFill == 0) continue;
-
-		// 记录此位置的具体填充信息（索引、堆叠数量、是否已有物品等）
+		
 		CheckedIndices.Append(TentativelyClaimed);
-		// Update the amount left to fill
+
+		// 把当前格子上的信息添加到 Result 中
 		Result.TotalRoomToFill += AmountToFillInSlot;
 		Result.SlotAvailabilities.Emplace(
 			FInv_SlotAvailability{
@@ -92,10 +92,11 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemMa
 
 		AmountToFill -= AmountToFillInSlot;
 
-		// How much is the Remainder?
+		// 还有要添加的道具吗？没有就返回结果，有就继续找下一个格子的信息。
 		Result.Remainder = AmountToFill;
+		
+		if (AmountToFill == 0) return Result;
 	}
-	// 循环结束后，确认剩余未填充数量（若有）
 
 	return Result;
 }

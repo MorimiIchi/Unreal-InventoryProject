@@ -38,7 +38,7 @@ void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
 {
 	FInv_SlotAvailabilityResult Result = InventoryMenu->HasRoomForItem(ItemComponent);
 
-	// 寻找背包里有没有相同类型的道具
+	// 寻找背包里有没有相同类型的道具，将决定是堆叠还是添加新道具
 	UInv_InventoryItem* FoundItem = InventoryList.FindFirstItemByType(ItemComponent->GetItemManifest().GetItemType());
 	Result.Item = FoundItem;
 
@@ -76,6 +76,16 @@ void UInv_InventoryComponent::Server_AddNewItem_Implementation(UInv_ItemComponen
 	}
 
 	// @todo: 通知 Item Component 销毁自己的 Owner Actor
+	const FGameplayTag& ItemType = IsValid(ItemComponent)
+		                               ? ItemComponent->GetItemManifest().GetItemType()
+		                               : FGameplayTag::EmptyTag;
+	UInv_InventoryItem* Item = InventoryList.FindFirstItemByType(ItemType);
+	if (!IsValid(Item)) return;
+
+	Item->SetTotalStackCount(Item->GetTotalStackCount() + StackCount);
+
+	// TODO: Destroy the item if the Remainder is zero.
+	// Otherwise, update the stack count for the item pickup. 
 }
 
 void UInv_InventoryComponent::Server_AddStacksToItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount,
