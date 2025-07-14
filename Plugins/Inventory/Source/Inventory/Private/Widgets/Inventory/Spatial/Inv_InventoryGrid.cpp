@@ -235,8 +235,9 @@ bool UInv_InventoryGrid::IsLeftClick(const FPointerEvent& MouseEvent) const
 void UInv_InventoryGrid::PickUp(UInv_InventoryItem* ClickedInventoryItem, const int32 GridIndex)
 {
 	// Assign Hover Item
-	AssignHoverItem(ClickedInventoryItem,GridIndex,GridIndex);
+	AssignHoverItem(ClickedInventoryItem, GridIndex, GridIndex);
 	// 从 Grid 移除点击的道具
+	RemoveItemFromGrid(ClickedInventoryItem, GridIndex);
 }
 
 void UInv_InventoryGrid::AssignHoverItem(UInv_InventoryItem* InventoryItem, const int32 GridIndex,
@@ -246,6 +247,32 @@ void UInv_InventoryGrid::AssignHoverItem(UInv_InventoryItem* InventoryItem, cons
 
 	HoverItem->SetPreviousGridIndex(PreviousGridIndex);
 	HoverItem->UpdateStackCount(InventoryItem->IsStackable() ? GridSlots[GridIndex]->GetStackCount() : 0);
+}
+
+void UInv_InventoryGrid::RemoveItemFromGrid(UInv_InventoryItem* InventoryItem, const int32 GridIndex)
+{
+	// 拿到 Grid Fragment
+	const FInv_GridFragment* GridFragment = GetFragment<FInv_GridFragment>(InventoryItem, FragmentTags::GridFragment);
+	if (!GridFragment) return;
+	
+	// 对每个格子取消占用
+	UInv_InventoryStatics::ForEach2D(GridSlots, GridIndex, GridFragment->GetGridSize(), Columns,
+	                                 [&](UInv_GridSlot* GridSlot)
+	                                 {
+		                                 GridSlot->SetInventoryItem(nullptr);
+		                                 GridSlot->SetUpperLeftIndex(INDEX_NONE);
+		                                 GridSlot->SetUnoccupiedTexture();
+		                                 GridSlot->SetAvailable(false);
+		                                 GridSlot->SetStackCount(0);
+	                                 });
+
+	// 从 Map 中移除
+	if (SlottedItems.Contains(GridIndex))
+	{
+		TObjectPtr<UInv_SlottedItem> FoundSlottedItem;
+		SlottedItems.RemoveAndCopyValue(GridIndex, FoundSlottedItem);
+		FoundSlottedItem->RemoveFromParent();
+	}
 }
 
 void UInv_InventoryGrid::AssignHoverItem(UInv_InventoryItem* InventoryItem)
