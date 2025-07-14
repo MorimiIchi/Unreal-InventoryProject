@@ -42,6 +42,7 @@ public class Inventory : ModuleRules
 				"SlateCore",
 				"EnhancedInput",
 				"UMG",
+				"InputCore"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

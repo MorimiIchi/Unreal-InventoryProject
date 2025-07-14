@@ -17,6 +17,7 @@ class UInv_ItemComponent;
 class UInv_InventoryComponent;
 class UCanvasPanel;
 class UInv_GridSlot;
+class UInv_HoverItem;
 /**
  * 
  */
@@ -66,6 +67,8 @@ private:
 	int32 DetermineFillAmountForSlot(const bool bStackable, const int32 MaxStackSize, const int32 AmountToFill,
 	                                 const UInv_GridSlot* GridSlot) const;
 	int32 GetStackAmount(const UInv_GridSlot* GridSlot) const;
+	bool IsRightClick(const FPointerEvent& MouseEvent) const;
+	bool IsLeftClick(const FPointerEvent& MouseEvent) const;
 
 	UFUNCTION()
 	void AddStacks(const FInv_SlotAvailabilityResult& Result);
@@ -102,4 +105,11 @@ private:
 
 	UPROPERTY(EditAnywhere, Category="Inventory")
 	float TileSize;
+
+	UPROPERTY(EditAnywhere, Category="Inventory")
+	TSubclassOf<UInv_HoverItem> HoverItemClass;
+
+	UPROPERTY()
+	TObjectPtr<UInv_HoverItem> HoverItem;
+	
 };
