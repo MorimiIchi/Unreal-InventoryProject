@@ -70,6 +70,10 @@ private:
 	UFUNCTION()
 	void AddStacks(const FInv_SlotAvailabilityResult& Result);
 
+	/** 玩家按下道具栏中的道具时处理下拖动事件 */
+	UFUNCTION()
+	void OnSlottedItemClicked(const int32 GridIndex, const FPointerEvent& MouseEvent);
+
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
 
 	UPROPERTY(meta=(BindWidget))

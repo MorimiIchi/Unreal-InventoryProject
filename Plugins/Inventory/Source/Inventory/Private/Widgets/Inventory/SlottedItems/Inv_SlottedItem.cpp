@@ -2,10 +2,15 @@
 
 
 #include "Widgets/Inventory/SlottedItems/Inv_SlottedItem.h"
-#include "Items/Inv_InventoryItem.h"
-
+#include "Inventory/Public/Items/Inv_InventoryItem.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+
+FReply UInv_SlottedItem::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	OnSlottedItemClicked.Broadcast(GridIndex, InMouseEvent);
+	return FReply::Handled();
+}
 
 void UInv_SlottedItem::SetInventoryItem(UInv_InventoryItem* InInventoryItem)
 {
