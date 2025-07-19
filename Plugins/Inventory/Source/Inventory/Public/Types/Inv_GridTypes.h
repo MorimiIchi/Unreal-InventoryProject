@@ -55,7 +55,7 @@ struct FInv_SlotAvailabilityResult
 	/** 指向物品栏中已有的物品 */
 	TWeakObjectPtr<UInv_InventoryItem> Item;
 	/** 当前可以放入的该物品数量 */
-	int32  TotalRoomToFill{0};
+	int32 TotalRoomToFill{0};
 	/** 无法放入的物品数量 */
 	int32 Remainder{0};
 	/** 是否可堆叠 */
@@ -63,3 +63,39 @@ struct FInv_SlotAvailabilityResult
 	/** 具体格子的数据集合 */
 	TArray<FInv_SlotAvailability> SlotAvailabilities;
 };
+
+/**
+ * 拖动开始时的鼠标位置象限，用于拖动道具时处理高亮
+ */
+UENUM(BlueprintType)
+enum class EInv_TileQuadrant : uint8
+{
+	TopLeft,
+	TopRight,
+	BottomLeft,
+	BottomRight,
+	None
+};
+
+/**
+ * 在 InventoryGrid 中承载拖动信息
+ */
+USTRUCT(BlueprintType)
+struct FInv_TileParameters
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Inventory")
+	FIntPoint TileCoordinates{};
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Inventory")
+	int32 TileIndex{INDEX_NONE};
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Inventory")
+	EInv_TileQuadrant TileQuadrant{EInv_TileQuadrant::None};
+};
+
+inline bool operator==(const FInv_TileParameters& A, const FInv_TileParameters& B)
+{
+	return A.TileCoordinates == B.TileCoordinates && A.TileIndex == B.TileIndex && A.TileQuadrant == B.TileQuadrant;
+}

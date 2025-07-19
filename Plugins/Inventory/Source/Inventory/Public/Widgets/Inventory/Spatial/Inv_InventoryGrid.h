@@ -115,5 +115,8 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UInv_HoverItem> HoverItem;
-	
+
+	/** 用来处理鼠标拖动物体时的高亮等信息 */
+	FInv_TileParameters TileParameters;
+	FInv_TileParameters LastTileParameters;	
 };
