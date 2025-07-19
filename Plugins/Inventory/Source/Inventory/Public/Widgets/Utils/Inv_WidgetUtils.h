@@ -7,6 +7,7 @@
 #include "Types/Inv_GridTypes.h"
 #include "Inv_WidgetUtils.generated.h"
 
+class UWidget;
 class UInv_ItemComponent;
 /**
  * 
@@ -23,5 +24,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	static FIntPoint GetPositionFromIndex(const int32 Index,const int32 Columns);
 
-	
+	UFUNCTION(BlueprintCallable,Category="Inventory")
+	static FVector2D GetWidgetPosition(UWidget* Widget);
 };
