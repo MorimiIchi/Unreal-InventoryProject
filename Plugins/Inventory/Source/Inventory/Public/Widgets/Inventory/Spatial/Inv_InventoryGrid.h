@@ -74,12 +74,15 @@ private:
 	void AssignHoverItem(UInv_InventoryItem* InventoryItem);
 	void AssignHoverItem(UInv_InventoryItem* InventoryItem, const int32 GridIndex, const int32 PreviousGridIndex);
 	void RemoveItemFromGrid(UInv_InventoryItem* InventoryItem, const int32 GridIndex);
-	
-	/** 算出鼠标落在哪一格 */
-	FIntPoint CalculateHoveredCoordinates(const FVector2D& CanvasPosition, const FVector2D& MousePosition) const;
-	
+
 	/** 计算瓦片的坐标系，用于处理网格插槽的高亮与否 */
 	void UpdateTileParameters(const FVector2D& CanvasPosition, const FVector2D& MousePosition);
+
+	/** 算出鼠标落在哪一格 */
+	FIntPoint CalculateHoveredCoordinates(const FVector2D& CanvasPosition, const FVector2D& MousePosition) const;
+
+	/** 计算鼠标位置在格子中的哪个象限上 */
+	EInv_TileQuadrant CalculateTileQuadrant(const FVector2D& CanvasPosition, const FVector2D& MousePosition) const;
 
 	UFUNCTION()
 	void AddStacks(const FInv_SlotAvailabilityResult& Result);
@@ -125,5 +128,5 @@ private:
 
 	/** 用来处理鼠标拖动物体时的高亮等信息 */
 	FInv_TileParameters TileParameters;
-	FInv_TileParameters LastTileParameters;	
+	FInv_TileParameters LastTileParameters;
 };

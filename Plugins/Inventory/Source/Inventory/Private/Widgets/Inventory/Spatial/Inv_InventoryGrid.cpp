@@ -44,22 +44,44 @@ void UInv_InventoryGrid::UpdateTileParameters(const FVector2D& CanvasPosition, c
 	// 如果鼠标不在 Canvas Panel 中就不处理
 	// Calculate the tile quadrant, tile index, and coordinates
 	// Handle highlight/unhighlight of the grid slots
-	
+
 	// 算出鼠标落在哪一格
 	const FIntPoint HoveredTileCoordinates = CalculateHoveredCoordinates(CanvasPosition, MousePosition);
-	
+
 	LastTileParameters = TileParameters;
 	TileParameters.TileCoordinates = HoveredTileCoordinates;
 	TileParameters.TileIndex = UInv_WidgetUtils::GetIndexFromPosition(HoveredTileCoordinates, Columns);
+	TileParameters.TileQuadrant = CalculateTileQuadrant(CanvasPosition, MousePosition);
 }
 
 FIntPoint UInv_InventoryGrid::CalculateHoveredCoordinates(const FVector2D& CanvasPosition,
-	const FVector2D& MousePosition) const
+                                                          const FVector2D& MousePosition) const
 {
 	return FIntPoint{
 		FMath::FloorToInt32((MousePosition.X - CanvasPosition.X) / TileSize),
 		FMath::FloorToInt32((MousePosition.Y - CanvasPosition.Y) / TileSize),
 	};
+}
+
+EInv_TileQuadrant UInv_InventoryGrid::CalculateTileQuadrant(const FVector2D& CanvasPosition,
+                                                            const FVector2D& MousePosition) const
+{
+	// 计算鼠标在格子中的位置
+	const float TileLocalX = FMath::Fmod(MousePosition.X - CanvasPosition.X, TileSize);
+	const float TileLocalY = FMath::Fmod(MousePosition.Y - CanvasPosition.Y, TileSize);
+
+	// 计算鼠标在格子中的象限
+	const bool bIsTop = TileLocalY < TileSize / 2.f;
+	const bool bIsLeft = TileLocalX < TileSize / 2.f;
+
+	EInv_TileQuadrant HoveredQuadrant;
+
+	if (bIsTop && bIsLeft) HoveredQuadrant = EInv_TileQuadrant::TopLeft;
+	else if (bIsTop && !bIsLeft) HoveredQuadrant = EInv_TileQuadrant::TopRight;
+	else if (!bIsTop && bIsLeft) HoveredQuadrant = EInv_TileQuadrant::BottomLeft;
+	else HoveredQuadrant = EInv_TileQuadrant::BottomRight;
+
+	return HoveredQuadrant;
 }
 
 FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const UInv_ItemComponent* ItemComponent)
