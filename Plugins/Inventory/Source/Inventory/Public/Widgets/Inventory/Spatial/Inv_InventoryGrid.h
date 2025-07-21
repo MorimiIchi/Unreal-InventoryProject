@@ -75,6 +75,9 @@ private:
 	void AssignHoverItem(UInv_InventoryItem* InventoryItem, const int32 GridIndex, const int32 PreviousGridIndex);
 	void RemoveItemFromGrid(UInv_InventoryItem* InventoryItem, const int32 GridIndex);
 	
+	/** 算出鼠标落在哪一格 */
+	FIntPoint CalculateHoveredCoordinates(const FVector2D& CanvasPosition, const FVector2D& MousePosition) const;
+	
 	/** 计算瓦片的坐标系，用于处理网格插槽的高亮与否 */
 	void UpdateTileParameters(const FVector2D& CanvasPosition, const FVector2D& MousePosition);
 
