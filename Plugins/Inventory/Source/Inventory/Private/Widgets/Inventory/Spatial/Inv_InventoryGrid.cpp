@@ -60,6 +60,8 @@ void UInv_InventoryGrid::OnTileParameterUpdated(const FInv_TileParameters& Param
 	if (!IsValid(HoverItem)) return;
 
 	// 获取到 Hover Item 的范围
+	const FIntPoint Dimensions = HoverItem->GetGridDimensions();
+	
 	// 计算高亮的起始坐标
 	// 检查鼠标悬停位置
 		// 在 Grid 范围内吗？
