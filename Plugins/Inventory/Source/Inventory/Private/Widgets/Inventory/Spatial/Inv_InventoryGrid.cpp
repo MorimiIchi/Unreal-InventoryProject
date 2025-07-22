@@ -42,16 +42,29 @@ void UInv_InventoryGrid::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
 void UInv_InventoryGrid::UpdateTileParameters(const FVector2D& CanvasPosition, const FVector2D& MousePosition)
 {
 	// 如果鼠标不在 Canvas Panel 中就不处理
-	// Calculate the tile quadrant, tile index, and coordinates
-	// Handle highlight/unhighlight of the grid slots
 
-	// 算出鼠标落在哪一格
+	// 算出 TileParameters，包括鼠标在哪一格，鼠标在哪个 Index 上，鼠标在格子上的哪一象限
 	const FIntPoint HoveredTileCoordinates = CalculateHoveredCoordinates(CanvasPosition, MousePosition);
 
 	LastTileParameters = TileParameters;
 	TileParameters.TileCoordinates = HoveredTileCoordinates;
 	TileParameters.TileIndex = UInv_WidgetUtils::GetIndexFromPosition(HoveredTileCoordinates, Columns);
 	TileParameters.TileQuadrant = CalculateTileQuadrant(CanvasPosition, MousePosition);
+	
+	// 处理格子的高亮与否
+	OnTileParameterUpdated(TileParameters);
+}
+
+void UInv_InventoryGrid::OnTileParameterUpdated(const FInv_TileParameters& Parameters)
+{
+	if (!IsValid(HoverItem)) return;
+
+	// 获取到 Hover Item 的范围
+	// 计算高亮的起始坐标
+	// 检查鼠标悬停位置
+		// 在 Grid 范围内吗？
+		// 这里有道具吗？
+			// 能和这个道具交换吗？
 }
 
 FIntPoint UInv_InventoryGrid::CalculateHoveredCoordinates(const FVector2D& CanvasPosition,

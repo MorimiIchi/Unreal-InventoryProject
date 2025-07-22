@@ -84,6 +84,9 @@ private:
 	/** 计算鼠标位置在格子中的哪个象限上 */
 	EInv_TileQuadrant CalculateTileQuadrant(const FVector2D& CanvasPosition, const FVector2D& MousePosition) const;
 
+	/** TileParameter 更新时 */
+	void OnTileParameterUpdated(const FInv_TileParameters& Parameters);
+
 	UFUNCTION()
 	void AddStacks(const FInv_SlotAvailabilityResult& Result);
 
