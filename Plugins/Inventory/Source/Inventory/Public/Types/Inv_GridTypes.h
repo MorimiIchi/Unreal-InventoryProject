@@ -99,3 +99,21 @@ inline bool operator==(const FInv_TileParameters& A, const FInv_TileParameters& 
 {
 	return A.TileCoordinates == B.TileCoordinates && A.TileIndex == B.TileIndex && A.TileQuadrant == B.TileQuadrant;
 }
+
+/**
+ * 用来描述一个单元格上的空间可用状态
+ */
+USTRUCT()
+struct FInv_SpaceQueryResult
+{
+	GENERATED_BODY()
+
+	// 这个单元格上有没有空间（有空间就是没道具）
+	bool bHasSpace{false};
+
+	// 这个单元格上没有空间的话，它上面的道具是否可以被交换？
+	TWeakObjectPtr<UInv_InventoryItem> ValidItem = nullptr;
+
+	// 上述道具可以被交换的话，它的锚点 Index 是什么？
+	int32 UpperLeftIndex{INDEX_NONE};
+};

@@ -63,10 +63,26 @@ void UInv_InventoryGrid::OnTileParameterUpdated(const FInv_TileParameters& Param
 	const FIntPoint Dimensions = HoverItem->GetGridDimensions();
 
 	// 计算高亮的起始坐标
+	const FIntPoint StartingCoordinate = CalculateStartingCoordinate(Parameters.TileCoordinates, Dimensions,
+	                                                                 Parameters.TileQuadrant);
+
+	ItemDropIndex = UInv_WidgetUtils::GetIndexFromPosition(StartingCoordinate, Columns);
+
 	// 检查鼠标悬停位置
+}
+
+FInv_SpaceQueryResult UInv_InventoryGrid::CheckHoverPosition(const FIntPoint& Position,
+                                                             const FIntPoint& Dimensions) const
+{
+	FInv_SpaceQueryResult QueryResult;
+	
 	// 在 Grid 范围内吗？
+	if (!IsInGridBounds(UInv_WidgetUtils::GetIndexFromPosition(Position, Columns), Dimensions)) return QueryResult;
+	
 	// 这里有道具吗？
 	// 能和这个道具交换吗？
+
+	return QueryResult;
 }
 
 FIntPoint UInv_InventoryGrid::CalculateStartingCoordinate(const FIntPoint& Coordinate, const FIntPoint& Dimensions,
@@ -92,7 +108,7 @@ FIntPoint UInv_InventoryGrid::CalculateStartingCoordinate(const FIntPoint& Coord
 		(Quadrant == EInv_TileQuadrant::TopRight || Quadrant == EInv_TileQuadrant::BottomRight) ? HasEvenWidth : 0);
 	StartingCoord.Y = Coordinate.Y - FMath::FloorToInt(0.5f * Dimensions.Y) + (
 		(Quadrant == EInv_TileQuadrant::BottomLeft || Quadrant == EInv_TileQuadrant::BottomRight) ? HasEvenHeight : 0);
-	
+
 	return StartingCoord;
 }
 

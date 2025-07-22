@@ -18,6 +18,12 @@ class INVENTORY_API UInv_WidgetUtils : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
+	/**
+	 * 由单元格坐标获得其 Index
+	 * @param Position 单元格坐标
+	 * @param Columns  总列数
+	 * @return 单元格 Index
+	 */
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	static int32 GetIndexFromPosition(const FIntPoint& Position, const int32 Columns);
 	

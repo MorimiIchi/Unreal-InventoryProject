@@ -91,6 +91,9 @@ private:
 	FIntPoint CalculateStartingCoordinate(const FIntPoint& Coordinate, const FIntPoint& Dimensions,
 	                                      const EInv_TileQuadrant Quadrant) const;
 
+	/** 检查拖动道具结束时要放置道具的目标单元格的可用性 */
+	FInv_SpaceQueryResult CheckHoverPosition(const FIntPoint& Position, const FIntPoint& Dimensions) const;
+
 	UFUNCTION()
 	void AddStacks(const FInv_SlotAvailabilityResult& Result);
 
@@ -136,4 +139,8 @@ private:
 	/** 用来处理鼠标拖动物体时的高亮等信息 */
 	FInv_TileParameters TileParameters;
 	FInv_TileParameters LastTileParameters;
+
+	/** 当拖动道具并最终点击一个可用的单元格时，将要放下道具的 Index */
+	int32 ItemDropIndex{INDEX_NONE};
+	FInv_SpaceQueryResult CurrentQueryResult;
 };
