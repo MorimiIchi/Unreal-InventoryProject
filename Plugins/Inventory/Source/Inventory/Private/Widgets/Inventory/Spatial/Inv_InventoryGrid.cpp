@@ -50,7 +50,7 @@ void UInv_InventoryGrid::UpdateTileParameters(const FVector2D& CanvasPosition, c
 	TileParameters.TileCoordinates = HoveredTileCoordinates;
 	TileParameters.TileIndex = UInv_WidgetUtils::GetIndexFromPosition(HoveredTileCoordinates, Columns);
 	TileParameters.TileQuadrant = CalculateTileQuadrant(CanvasPosition, MousePosition);
-	
+
 	// 处理格子的高亮与否
 	OnTileParameterUpdated(TileParameters);
 }
@@ -61,12 +61,39 @@ void UInv_InventoryGrid::OnTileParameterUpdated(const FInv_TileParameters& Param
 
 	// 获取到 Hover Item 的范围
 	const FIntPoint Dimensions = HoverItem->GetGridDimensions();
-	
+
 	// 计算高亮的起始坐标
 	// 检查鼠标悬停位置
-		// 在 Grid 范围内吗？
-		// 这里有道具吗？
-			// 能和这个道具交换吗？
+	// 在 Grid 范围内吗？
+	// 这里有道具吗？
+	// 能和这个道具交换吗？
+}
+
+FIntPoint UInv_InventoryGrid::CalculateStartingCoordinate(const FIntPoint& Coordinate, const FIntPoint& Dimensions,
+                                                          const EInv_TileQuadrant Quadrant) const
+{
+	// 鼠标悬停在格子当中时，起始坐标的计算取决于以下因素：
+	// - 鼠标当前所处的网格坐标
+	// - 物品本身的尺寸
+	// - 鼠标所处的格子内部的象限位置
+
+	// 当道具被拖动时，鼠标本身是位于道具（图标）的中央的
+	// 而我们的预期是，如果道具需要占用多格，无论拖到哪里，我们都从锚点位置（左上角第一个格子）开始计算要高亮的格子的尺寸
+
+	// 但这里需要注意的是格子的垂直格数及水平格数是奇数还是偶数。我们的预期是：
+	// - 奇数格：鼠标在该方向上移动时，要完全进入另一格时才变更要悬停高亮的格子
+	// - 偶数格：鼠标在该方向上移动时，只需要在同一个格子里换到另外半边，就能变更要悬停高亮的格子
+
+	const int32 HasEvenWidth = Dimensions.X % 2 == 0 ? 1 : 0;
+	const int32 HasEvenHeight = Dimensions.Y % 2 == 0 ? 1 : 0;
+
+	FIntPoint StartingCoord;
+	StartingCoord.X = Coordinate.X - FMath::FloorToInt(0.5f * Dimensions.X) + (
+		(Quadrant == EInv_TileQuadrant::TopRight || Quadrant == EInv_TileQuadrant::BottomRight) ? HasEvenWidth : 0);
+	StartingCoord.Y = Coordinate.Y - FMath::FloorToInt(0.5f * Dimensions.Y) + (
+		(Quadrant == EInv_TileQuadrant::BottomLeft || Quadrant == EInv_TileQuadrant::BottomRight) ? HasEvenHeight : 0);
+	
+	return StartingCoord;
 }
 
 FIntPoint UInv_InventoryGrid::CalculateHoveredCoordinates(const FVector2D& CanvasPosition,

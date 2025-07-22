@@ -87,6 +87,10 @@ private:
 	/** TileParameter 更新时 */
 	void OnTileParameterUpdated(const FInv_TileParameters& Parameters);
 
+	/** 计算拖动道具时高亮道具的起始格 */
+	FIntPoint CalculateStartingCoordinate(const FIntPoint& Coordinate, const FIntPoint& Dimensions,
+	                                      const EInv_TileQuadrant Quadrant) const;
+
 	UFUNCTION()
 	void AddStacks(const FInv_SlotAvailabilityResult& Result);
 
