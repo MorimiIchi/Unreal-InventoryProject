@@ -20,7 +20,7 @@ FIntPoint UInv_WidgetUtils::GetPositionFromIndex(const int32 Index, const int32 
 FVector2D UInv_WidgetUtils::GetWidgetPosition(UWidget* Widget)
 {
 	// 目标：拿到控件左上角位置在视口坐标系中的位置
-	
+
 	// 拿到控件的几何信息
 	const FGeometry Geometry = Widget->GetCachedGeometry();
 	// 拿到控件的本地左上角位置，以便在之后转换为视口坐标
@@ -31,6 +31,19 @@ FVector2D UInv_WidgetUtils::GetWidgetPosition(UWidget* Widget)
 	FVector2D PixelPosition;
 	FVector2D ViewportPosition;
 	USlateBlueprintLibrary::LocalToViewport(Widget, Geometry, LocalTopLeft, PixelPosition, ViewportPosition);
-	
+
 	return ViewportPosition;
+}
+
+FVector2D UInv_WidgetUtils::GetWidgetSize(UWidget* Widget)
+{
+	const FGeometry Geometry = Widget->GetCachedGeometry();
+	return Geometry.GetLocalSize();
+}
+
+bool UInv_WidgetUtils::IsWithinBounds(const FVector2D& BoundaryPos, const FVector2D& WidgetSize,
+                                      const FVector2D& MousePos)
+{
+	return MousePos.X >= BoundaryPos.X && MousePos.X <= (BoundaryPos.X + WidgetSize.X) &&
+		MousePos.Y >= BoundaryPos.Y && MousePos.Y <= (BoundaryPos.Y + WidgetSize.Y);
 }

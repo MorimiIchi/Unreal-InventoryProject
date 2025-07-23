@@ -94,6 +94,9 @@ private:
 	/** 检查拖动道具结束时要放置道具的目标单元格的可用性 */
 	FInv_SpaceQueryResult CheckHoverPosition(const FIntPoint& Position, const FIntPoint& Dimensions);
 
+	/** 鼠标退出画布时就不再需要计算了 */
+	bool CursorExitedCanvas(const FVector2D& BoundaryPos, const FVector2D& BoundarySize, const FVector2D& Location);
+
 	UFUNCTION()
 	void AddStacks(const FInv_SlotAvailabilityResult& Result);
 
@@ -143,4 +146,7 @@ private:
 	/** 当拖动道具并最终点击一个可用的单元格时，将要放下道具的 Index */
 	int32 ItemDropIndex{INDEX_NONE};
 	FInv_SpaceQueryResult CurrentQueryResult;
+
+	bool bMouseWithinCanvas;
+	bool bLastMouseWithinCanvas;
 };
