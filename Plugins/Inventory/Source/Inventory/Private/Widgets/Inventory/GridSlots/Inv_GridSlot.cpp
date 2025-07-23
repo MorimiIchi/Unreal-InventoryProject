@@ -2,6 +2,7 @@
 
 
 #include "Widgets/Inventory/GridSlots/Inv_GridSlot.h"
+#include "Items/Inv_InventoryItem.h"
 
 #include "Components/Image.h"
 

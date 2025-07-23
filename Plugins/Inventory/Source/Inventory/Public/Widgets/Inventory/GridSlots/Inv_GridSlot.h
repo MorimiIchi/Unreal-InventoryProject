@@ -53,8 +53,8 @@ private:
 	 * - 格子可用性
 	 */
 
-	int32 TileIndex;
-	int32 StackCount;
+	int32 TileIndex{INDEX_NONE};
+	int32 StackCount{0};
 	int32 UpperLeftIndex{INDEX_NONE};
 	TWeakObjectPtr<UInv_InventoryItem> InventoryItem;
 	bool bAvailable{true};

@@ -50,10 +50,10 @@ private:
 	void AddItemAtIndex(UInv_InventoryItem* Item, const int32 Index, const bool bStackable, const int32 StackAmount);
 	UInv_SlottedItem* CreateSlottedItem(UInv_InventoryItem* Item, const bool bStackable, const int32 StackAmount,
 	                                    const FInv_GridFragment* GridFragment, const FInv_ImageFragment* ImageFragment,
-	                                    const int32 Index) const;
+	                                    const int32 Index);
 	void AddSlottedItemToCanvas(const int32 Index, const FInv_GridFragment* GridFragment,
 	                            UInv_SlottedItem* SlottedItem) const;
-	void UpdateGridSlots(UInv_InventoryItem* NewItem, const int32 Index, bool bStaclableItem, int32 StackAmount);
+	void UpdateGridSlots(UInv_InventoryItem* NewItem, const int32 Index, bool bStackableItem, int32 StackAmount);
 	bool IsIndexClaimed(const TSet<int32>& Indices, const int32 Index) const;
 	bool HasRoomAtIndex(const UInv_GridSlot* GridSlot, const FIntPoint& Dimensions, const TSet<int32>& CheckedIndices,
 	                    TSet<int32>& OutTentativelyClaimed, const FGameplayTag& ItemType, const int32 StackMaxSize);
@@ -97,12 +97,15 @@ private:
 	/** 鼠标退出画布时就不再需要计算了 */
 	bool CursorExitedCanvas(const FVector2D& BoundaryPos, const FVector2D& BoundarySize, const FVector2D& Location);
 
+	void HighLightSlots(const int32 Index, const FIntPoint& Dimensions);
+	void UnhighLightSlots(const int32 Index, const FIntPoint& Dimensions);
+
 	UFUNCTION()
 	void AddStacks(const FInv_SlotAvailabilityResult& Result);
 
 	/** 玩家按下道具栏中的道具时处理下拖动事件 */
 	UFUNCTION()
-	void OnSlottedItemClicked(const int32 GridIndex, const FPointerEvent& MouseEvent);
+	void OnSlottedItemClicked(int32 GridIndex, const FPointerEvent& MouseEvent);
 
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
 
@@ -149,4 +152,7 @@ private:
 
 	bool bMouseWithinCanvas;
 	bool bLastMouseWithinCanvas;
+
+	int32 LastHighlightedIndex;
+	FIntPoint LastHighlightedDimensions;
 };
