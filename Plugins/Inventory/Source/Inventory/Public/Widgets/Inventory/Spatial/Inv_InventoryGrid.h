@@ -92,7 +92,7 @@ private:
 	                                      const EInv_TileQuadrant Quadrant) const;
 
 	/** 检查拖动道具结束时要放置道具的目标单元格的可用性 */
-	FInv_SpaceQueryResult CheckHoverPosition(const FIntPoint& Position, const FIntPoint& Dimensions) const;
+	FInv_SpaceQueryResult CheckHoverPosition(const FIntPoint& Position, const FIntPoint& Dimensions);
 
 	UFUNCTION()
 	void AddStacks(const FInv_SlotAvailabilityResult& Result);

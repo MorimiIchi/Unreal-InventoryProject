@@ -69,18 +69,44 @@ void UInv_InventoryGrid::OnTileParameterUpdated(const FInv_TileParameters& Param
 	ItemDropIndex = UInv_WidgetUtils::GetIndexFromPosition(StartingCoordinate, Columns);
 
 	// 检查鼠标悬停位置
+	CurrentQueryResult = CheckHoverPosition(StartingCoordinate, Dimensions);
 }
 
-FInv_SpaceQueryResult UInv_InventoryGrid::CheckHoverPosition(const FIntPoint& Position,
-                                                             const FIntPoint& Dimensions) const
+FInv_SpaceQueryResult UInv_InventoryGrid::CheckHoverPosition(const FIntPoint& Position, const FIntPoint& Dimensions)
 {
 	FInv_SpaceQueryResult QueryResult;
-	
+
 	// 在 Grid 范围内吗？
 	if (!IsInGridBounds(UInv_WidgetUtils::GetIndexFromPosition(Position, Columns), Dimensions)) return QueryResult;
-	
-	// 这里有道具吗？
+
+	QueryResult.bHasSpace = true;
+
+	// 这里有道具吗？若有物品，是否仅唯一单元格持有同一物品？
+	// - 因为正在拖动的道具可能会覆盖住一片区域，该区域可能有多个道具的锚点在
+	TSet<int32> OccupiedUpperLeftIndices;
+	UInv_InventoryStatics::ForEach2D(GridSlots, UInv_WidgetUtils::GetIndexFromPosition(Position, Columns), Dimensions,
+	                                 Columns, [&](const UInv_GridSlot* GridSlot)
+	                                 {
+		                                 if (GridSlot->GetInventoryItem().IsValid())
+		                                 {
+			                                 OccupiedUpperLeftIndices.Add(GridSlot->GetUpperLeftIndex());
+			                                 QueryResult.bHasSpace = false;
+		                                 }
+	                                 });
+
 	// 能和这个道具交换吗？
+	// 等于 0：完全空闲，直接返回 hasSpace = true。
+	// 等于 1：有且仅有一个物品覆盖区域，允许“交换”或“合并”：
+	//  从集合中取出唯一索引，读取该格子的物品指针，赋给 result.validItem。
+	//  同时将该索引写入 result.upperLeftIndex。
+	// 大于 1：多于一个物品来源，既不可交换也不可放置，保持 hasSpace = false。
+
+	if (OccupiedUpperLeftIndices.Num() == 1) // 只有一个道具在这个位置上 —— 可以交换或者合并
+	{
+		const int32 Index = *OccupiedUpperLeftIndices.CreateConstIterator();
+		QueryResult.ValidItem = GridSlots[Index]->GetInventoryItem();
+		QueryResult.UpperLeftIndex = GridSlots[Index]->GetUpperLeftIndex();
+	}
 
 	return QueryResult;
 }
