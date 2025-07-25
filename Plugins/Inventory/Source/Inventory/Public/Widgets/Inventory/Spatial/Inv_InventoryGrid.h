@@ -18,6 +18,7 @@ class UInv_InventoryComponent;
 class UCanvasPanel;
 class UInv_GridSlot;
 class UInv_HoverItem;
+enum class EInv_GridSlotState : uint8;
 /**
  * 
  */
@@ -97,8 +98,13 @@ private:
 	/** 鼠标退出画布时就不再需要计算了 */
 	bool CursorExitedCanvas(const FVector2D& BoundaryPos, const FVector2D& BoundarySize, const FVector2D& Location);
 
+	/** 鼠标悬停在可用或可置换单元格上时高亮格子 */
 	void HighLightSlots(const int32 Index, const FIntPoint& Dimensions);
+	/** 鼠标离开时取消高亮格子 */
 	void UnhighLightSlots(const int32 Index, const FIntPoint& Dimensions);
+
+	/** 改变鼠标悬停时的格子材质 */
+	void ChangeHoverType(const int32 Index, const FIntPoint& Dimensions, EInv_GridSlotState GridSlotState);
 
 	UFUNCTION()
 	void AddStacks(const FInv_SlotAvailabilityResult& Result);

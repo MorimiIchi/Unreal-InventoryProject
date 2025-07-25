@@ -84,9 +84,14 @@ void UInv_InventoryGrid::OnTileParameterUpdated(const FInv_TileParameters& Param
 	}
 	UnhighLightSlots(LastHighlightedIndex, LastHighlightedDimensions);
 
-	if (CurrentQueryResult.ValidItem.IsValid())
+	if (CurrentQueryResult.ValidItem.IsValid() && GridSlots.IsValidIndex(CurrentQueryResult.UpperLeftIndex))
 	{
 		// 可以交换或合并道具
+		const FInv_GridFragment* GridFragment = GetFragment<FInv_GridFragment>(
+			CurrentQueryResult.ValidItem.Get(), FragmentTags::GridFragment);
+		if (!GridFragment) return;
+
+		ChangeHoverType(CurrentQueryResult.UpperLeftIndex, GridFragment->GetGridSize(), EInv_GridSlotState::GrayedOut);
 	}
 }
 
@@ -169,6 +174,33 @@ void UInv_InventoryGrid::UnhighLightSlots(const int32 Index, const FIntPoint& Di
 			GridSlot->SetOccupiedTexture();
 		}
 	});
+}
+
+void UInv_InventoryGrid::ChangeHoverType(const int32 Index, const FIntPoint& Dimensions,
+                                         EInv_GridSlotState GridSlotState)
+{
+	UnhighLightSlots(LastHighlightedIndex, LastHighlightedDimensions);
+	UInv_InventoryStatics::ForEach2D(GridSlots, Index, Dimensions, Columns,
+	                                 [State = GridSlotState](UInv_GridSlot* GridSlot)
+	                                 {
+		                                 switch (State)
+		                                 {
+		                                 case EInv_GridSlotState::Occupied:
+			                                 GridSlot->SetOccupiedTexture();
+			                                 break;
+		                                 case EInv_GridSlotState::Unoccupied:
+			                                 GridSlot->SetUnoccupiedTexture();
+			                                 break;
+		                                 case EInv_GridSlotState::GrayedOut:
+			                                 GridSlot->SetGrayedOutTexture();
+			                                 break;
+		                                 case EInv_GridSlotState::Selected:
+			                                 GridSlot->SetSelectedTexture();
+			                                 break;
+		                                 }
+	                                 });
+	LastHighlightedIndex = Index;
+	LastHighlightedDimensions = Dimensions;
 }
 
 FIntPoint UInv_InventoryGrid::CalculateStartingCoordinate(const FIntPoint& Coordinate, const FIntPoint& Dimensions,
