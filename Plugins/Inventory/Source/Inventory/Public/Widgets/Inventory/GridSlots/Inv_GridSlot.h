@@ -9,6 +9,8 @@
 class UInv_InventoryItem;
 class UImage;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGridSlotEvent, int32, GridIndex, const FPointerEvent&, MouseEvent);
+
 UENUM(BlueprintType)
 enum class EInv_GridSlotState : uint8
 {
@@ -19,7 +21,7 @@ enum class EInv_GridSlotState : uint8
 };
 
 /**
- * 
+ * 道具网格中的单个格子
  */
 UCLASS()
 class INVENTORY_API UInv_GridSlot : public UUserWidget
@@ -27,6 +29,11 @@ class INVENTORY_API UInv_GridSlot : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+
+
 	void SetOccupiedTexture();
 	void SetUnoccupiedTexture();
 	void SetSelectedTexture();
@@ -44,6 +51,10 @@ public:
 	bool IsAvailable() const { return bAvailable; }
 	void SetAvailable(const bool bIsAvailable) { bAvailable = bIsAvailable; }
 
+	FGridSlotEvent GridSlotClicked;
+	FGridSlotEvent GridSlotHovered;
+	FGridSlotEvent GridSlotUnhovered;
+
 private:
 	/**
 	 * 一个物品可能占据多个格子，要为这些格子设置相关的信息
@@ -53,6 +64,7 @@ private:
 	 * - 格子可用性
 	 */
 
+	/** * 该格子在网格中的索引 */
 	int32 TileIndex{INDEX_NONE};
 	int32 StackCount{0};
 	int32 UpperLeftIndex{INDEX_NONE};
