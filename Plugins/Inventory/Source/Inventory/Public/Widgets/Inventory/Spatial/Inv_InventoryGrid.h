@@ -107,6 +107,11 @@ private:
 	/** 改变鼠标悬停时的格子材质 */
 	void ChangeHoverType(const int32 Index, const FIntPoint& Dimensions, EInv_GridSlotState GridSlotState);
 
+	/** 将当前拖动的道具放下到指定的索引上 */
+	void PutDownOnIndex(const int32 Index);
+
+	void ClearHoverItem();
+
 	UFUNCTION()
 	void AddStacks(const FInv_SlotAvailabilityResult& Result);
 
