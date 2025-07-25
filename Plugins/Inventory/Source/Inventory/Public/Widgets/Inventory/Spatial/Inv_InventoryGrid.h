@@ -18,8 +18,9 @@ class UInv_InventoryComponent;
 class UCanvasPanel;
 class UInv_GridSlot;
 class UInv_HoverItem;
+
 /**
- * 
+ * 道具网格
  */
 UCLASS()
 class INVENTORY_API UInv_InventoryGrid : public UUserWidget
@@ -106,6 +107,19 @@ private:
 	/** 玩家按下道具栏中的道具时处理下拖动事件 */
 	UFUNCTION()
 	void OnSlottedItemClicked(int32 GridIndex, const FPointerEvent& MouseEvent);
+
+
+	/** 处理 GridSlot 的 GridSlotClicked 事件 */
+	UFUNCTION()
+	void OnGridSlotClicked(int32 GridIndex, const FPointerEvent& MouseEvent);
+
+	/** 处理 GridSlot 的 GridSlotHovered 事件 */
+	UFUNCTION()
+	void OnGridSlotHovered(int32 GridIndex, const FPointerEvent& MouseEvent);
+
+	/** 处理 GridSlot 的 GridSlotUnhovered 事件 */
+	UFUNCTION()
+	void OnGridSlotUnhovered(int32 GridIndex, const FPointerEvent& MouseEvent);
 
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
 
