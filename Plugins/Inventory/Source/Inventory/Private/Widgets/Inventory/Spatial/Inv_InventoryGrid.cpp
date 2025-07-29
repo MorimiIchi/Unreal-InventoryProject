@@ -566,7 +566,15 @@ void UInv_InventoryGrid::OnSlottedItemClicked(int32 GridIndex, const FPointerEve
 	if (!IsValid(HoverItem) && IsLeftClick(MouseEvent))
 	{
 		PickUp(ClickedInventoryItem, GridIndex);
+		return;
 	}
+
+	// 有 HoverItem 并点击到了道具的情况下，两者是否类型相同，且可堆叠？
+	// - 我们应该交换二者的堆叠吗？
+	// - 我们应该消耗掉 HoverItem 的堆叠吗？
+	// - 我们应该向点击的道具添加堆叠吗？（并且不消耗 HoverItem）
+	// - 点击到的 Slot 是否没有空间？
+	// 交换 HoverItem
 }
 
 void UInv_InventoryGrid::AddItem(UInv_InventoryItem* Item)
