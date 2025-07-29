@@ -32,9 +32,10 @@ private:
 	UFUNCTION()
 	void ShowCraftables();
 
-	UFUNCTION()
-	void SetActiveGrid(UInv_InventoryGrid* Grid, UButton* Button);
 	void DisableButton(UButton* Button);
+	void SetActiveGrid(UInv_InventoryGrid* Grid, UButton* Button);
+	
+	TWeakObjectPtr<UInv_InventoryGrid> ActiveGrid;
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UWidgetSwitcher> Switcher;
