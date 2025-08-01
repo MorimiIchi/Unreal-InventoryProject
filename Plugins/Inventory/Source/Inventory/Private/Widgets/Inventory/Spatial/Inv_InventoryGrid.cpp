@@ -571,10 +571,20 @@ void UInv_InventoryGrid::OnSlottedItemClicked(int32 GridIndex, const FPointerEve
 	// 有 HoverItem 并点击到了道具的情况下，两者是否类型相同，且可堆叠？
 	if (IsSameStackable(ClickedInventoryItem))
 	{
+		const int32 ClickedStackCount = GridSlots[GridIndex]->GetStackCount();
+		const FInv_StackableFragment* StackableFragment = ClickedInventoryItem->GetItemManifest().GetFragmentOfType<
+			FInv_StackableFragment>();
+		const int32 MaxStackSize = StackableFragment->GetMaxStackSize();
+		const int32 RoomInClickedSlot = MaxStackSize - ClickedStackCount;
+		const int32 HoveredStackCount = HoverItem->GetStackCount();
 		// - 我们应该交换二者的堆叠吗？
+		if (ShouldSwapStackCounts(RoomInClickedSlot, HoveredStackCount, MaxStackSize))
+		{
+		}
 		// - 我们应该消耗掉 HoverItem 的堆叠吗？
 		// - 我们应该向点击的道具添加堆叠吗？（并且不消耗 HoverItem）
 		// - 点击到的 Slot 是否没有空间？
+		return;
 	}
 	// 交换 HoverItem
 	SwapWithHoverItem(ClickedInventoryItem, GridIndex);
@@ -809,6 +819,12 @@ void UInv_InventoryGrid::SwapWithHoverItem(UInv_InventoryItem* ClickedInventoryI
 	RemoveItemFromGrid(ClickedInventoryItem, GridIndex);
 	AddItemAtIndex(TempInventoryItem, ItemDropIndex /* 在鼠标当前位置放下道具 */, bTempIsStackable, TempStackCount);
 	UpdateGridSlots(TempInventoryItem, ItemDropIndex, bTempIsStackable, TempStackCount);
+}
+
+bool UInv_InventoryGrid::ShouldSwapStackCounts(const int32 RoomInClickedSlot, const int32 HoveredStackCount,
+                                               const int32 MaxStackSize) const
+{
+	return RoomInClickedSlot == 0 && HoveredStackCount < MaxStackSize;
 }
 
 void UInv_InventoryGrid::ShowCursor()

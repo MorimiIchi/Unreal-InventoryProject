@@ -76,13 +76,13 @@ private:
 	bool IsRightClick(const FPointerEvent& MouseEvent) const;
 	bool IsLeftClick(const FPointerEvent& MouseEvent) const;
 	void PickUp(UInv_InventoryItem* ClickedInventoryItem, const int32 GridIndex);
-	
+
 	/** 开始拖动道具时设置 HoverItem */
 	void AssignHoverItem(UInv_InventoryItem* InventoryItem, const int32 GridIndex, const int32 PreviousGridIndex);
 
 	/** 开始拖动道具时设置 HoverItem */
 	void AssignHoverItem(UInv_InventoryItem* InventoryItem);
-	
+
 	void RemoveItemFromGrid(UInv_InventoryItem* InventoryItem, const int32 GridIndex);
 
 	/** 计算瓦片的坐标系，用于处理网格插槽的高亮与否 */
@@ -129,6 +129,9 @@ private:
 
 	/** 拖动道具，点击道具，并且二者可以交换时，交换二者 */
 	void SwapWithHoverItem(UInv_InventoryItem* ClickedInventoryItem, const int32 GridIndex);
+
+	bool ShouldSwapStackCounts(const int32 RoomInClickedSlot, const int32 HoveredStackCount,
+	                           const int32 MaxStackSize) const;
 
 	UPROPERTY(EditAnywhere, Category="Inventory")
 	TSubclassOf<UUserWidget> VisibleCursorWidgetClass;
