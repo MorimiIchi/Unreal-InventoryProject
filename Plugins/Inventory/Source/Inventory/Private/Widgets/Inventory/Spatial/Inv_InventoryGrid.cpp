@@ -365,8 +365,7 @@ bool UInv_InventoryGrid::CheckSlotConstraints(const UInv_GridSlot* GridSlot, con
 {
 	//---------------------------------------------------------//
 	// 这个函数进行的检查都是针对道具要占用的每一个网格进行的，
-	// 外部进行的检查和这里进行的检查具有不同的意义，
-	// 
+	// 外部进行的检查和这里进行的检查具有不同的意义
 	//---------------------------------------------------------//
 
 	// 格子有被其它道具认领吗？
@@ -479,32 +478,6 @@ void UInv_InventoryGrid::AssignHoverItem(UInv_InventoryItem* InventoryItem, cons
 	HoverItem->UpdateStackCount(InventoryItem->IsStackable() ? GridSlots[GridIndex]->GetStackCount() : 0);
 }
 
-void UInv_InventoryGrid::RemoveItemFromGrid(UInv_InventoryItem* InventoryItem, const int32 GridIndex)
-{
-	// 拿到 Grid Fragment
-	const FInv_GridFragment* GridFragment = GetFragment<FInv_GridFragment>(InventoryItem, FragmentTags::GridFragment);
-	if (!GridFragment) return;
-
-	// 对每个格子取消占用
-	UInv_InventoryStatics::ForEach2D(GridSlots, GridIndex, GridFragment->GetGridSize(), Columns,
-	                                 [&](UInv_GridSlot* GridSlot)
-	                                 {
-		                                 GridSlot->SetInventoryItem(nullptr);
-		                                 GridSlot->SetUpperLeftIndex(INDEX_NONE);
-		                                 GridSlot->SetUnoccupiedTexture();
-		                                 GridSlot->SetAvailable(true);
-		                                 GridSlot->SetStackCount(0);
-	                                 });
-
-	// 从 Map 中移除
-	if (SlottedItems.Contains(GridIndex))
-	{
-		TObjectPtr<UInv_SlottedItem> FoundSlottedItem;
-		SlottedItems.RemoveAndCopyValue(GridIndex, FoundSlottedItem);
-		FoundSlottedItem->RemoveFromParent();
-	}
-}
-
 void UInv_InventoryGrid::AssignHoverItem(UInv_InventoryItem* InventoryItem)
 {
 	if (!IsValid(HoverItem))
@@ -531,6 +504,32 @@ void UInv_InventoryGrid::AssignHoverItem(UInv_InventoryItem* InventoryItem)
 	HoverItem->SetIsStackable(InventoryItem->IsStackable());
 
 	GetOwningPlayer()->SetMouseCursorWidget(EMouseCursor::Default, HoverItem);
+}
+
+void UInv_InventoryGrid::RemoveItemFromGrid(UInv_InventoryItem* InventoryItem, const int32 GridIndex)
+{
+	// 拿到 Grid Fragment
+	const FInv_GridFragment* GridFragment = GetFragment<FInv_GridFragment>(InventoryItem, FragmentTags::GridFragment);
+	if (!GridFragment) return;
+
+	// 对每个格子取消占用
+	UInv_InventoryStatics::ForEach2D(GridSlots, GridIndex, GridFragment->GetGridSize(), Columns,
+	                                 [&](UInv_GridSlot* GridSlot)
+	                                 {
+		                                 GridSlot->SetInventoryItem(nullptr);
+		                                 GridSlot->SetUpperLeftIndex(INDEX_NONE);
+		                                 GridSlot->SetUnoccupiedTexture();
+		                                 GridSlot->SetAvailable(true);
+		                                 GridSlot->SetStackCount(0);
+	                                 });
+
+	// 从 Map 中移除
+	if (SlottedItems.Contains(GridIndex))
+	{
+		TObjectPtr<UInv_SlottedItem> FoundSlottedItem;
+		SlottedItems.RemoveAndCopyValue(GridIndex, FoundSlottedItem);
+		FoundSlottedItem->RemoveFromParent();
+	}
 }
 
 void UInv_InventoryGrid::AddStacks(const FInv_SlotAvailabilityResult& Result)
@@ -570,11 +569,15 @@ void UInv_InventoryGrid::OnSlottedItemClicked(int32 GridIndex, const FPointerEve
 	}
 
 	// 有 HoverItem 并点击到了道具的情况下，两者是否类型相同，且可堆叠？
-	// - 我们应该交换二者的堆叠吗？
-	// - 我们应该消耗掉 HoverItem 的堆叠吗？
-	// - 我们应该向点击的道具添加堆叠吗？（并且不消耗 HoverItem）
-	// - 点击到的 Slot 是否没有空间？
+	if (IsSameStackable(ClickedInventoryItem))
+	{
+		// - 我们应该交换二者的堆叠吗？
+		// - 我们应该消耗掉 HoverItem 的堆叠吗？
+		// - 我们应该向点击的道具添加堆叠吗？（并且不消耗 HoverItem）
+		// - 点击到的 Slot 是否没有空间？
+	}
 	// 交换 HoverItem
+	SwapWithHoverItem(ClickedInventoryItem, GridIndex);
 }
 
 void UInv_InventoryGrid::AddItem(UInv_InventoryItem* Item)
@@ -783,6 +786,29 @@ UUserWidget* UInv_InventoryGrid::GetHiddenCursorWidget()
 		HiddenCursorWidget = CreateWidget<UUserWidget>(GetOwningPlayer(), HiddenCursorWidgetClass);
 	}
 	return HiddenCursorWidget;
+}
+
+bool UInv_InventoryGrid::IsSameStackable(const UInv_InventoryItem* ClickedInventoryItem) const
+{
+	const bool bIsSameItem = ClickedInventoryItem == HoverItem->GetInventoryItem();
+	const bool bIsStackable = ClickedInventoryItem->IsStackable();
+	return bIsSameItem && bIsStackable && HoverItem->GetItemType().MatchesTagExact(
+		ClickedInventoryItem->GetItemManifest().GetItemType());
+}
+
+void UInv_InventoryGrid::SwapWithHoverItem(UInv_InventoryItem* ClickedInventoryItem, const int32 GridIndex)
+{
+	if (!IsValid(HoverItem)) return;
+
+	UInv_InventoryItem* TempInventoryItem = HoverItem->GetInventoryItem();
+	const int32 TempStackCount = HoverItem->GetStackCount();
+	const bool bTempIsStackable = HoverItem->IsStackable();
+
+	// 让要捡起来的道具保持与正在拖动的道具相同的 PreviousGridIndex，因为正在拖动的道具会占用要捡起来的道具的 Index
+	AssignHoverItem(ClickedInventoryItem, GridIndex, HoverItem->GetPreviousGridIndex());
+	RemoveItemFromGrid(ClickedInventoryItem, GridIndex);
+	AddItemAtIndex(TempInventoryItem, ItemDropIndex /* 在鼠标当前位置放下道具 */, bTempIsStackable, TempStackCount);
+	UpdateGridSlots(TempInventoryItem, ItemDropIndex, bTempIsStackable, TempStackCount);
 }
 
 void UInv_InventoryGrid::ShowCursor()

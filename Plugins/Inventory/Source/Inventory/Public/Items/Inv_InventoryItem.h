@@ -8,6 +8,7 @@
 #include "Inv_InventoryItem.generated.h"
 
 /**
+ * 道具作为数据时的抽象表现
  * 这个道具类会放在 FastArray 里面用
  */
 UCLASS()
