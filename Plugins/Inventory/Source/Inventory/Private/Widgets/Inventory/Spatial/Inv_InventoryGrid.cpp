@@ -580,7 +580,9 @@ void UInv_InventoryGrid::OnSlottedItemClicked(int32 GridIndex, const FPointerEve
 		// - 我们应该交换二者的堆叠吗？
 		if (ShouldSwapStackCounts(RoomInClickedSlot, HoveredStackCount, MaxStackSize))
 		{
+			SwapStackCounts(ClickedStackCount, HoveredStackCount, GridIndex);
 		}
+		
 		// - 我们应该消耗掉 HoverItem 的堆叠吗？
 		// - 我们应该向点击的道具添加堆叠吗？（并且不消耗 HoverItem）
 		// - 点击到的 Slot 是否没有空间？
@@ -825,6 +827,18 @@ bool UInv_InventoryGrid::ShouldSwapStackCounts(const int32 RoomInClickedSlot, co
                                                const int32 MaxStackSize) const
 {
 	return RoomInClickedSlot == 0 && HoveredStackCount < MaxStackSize;
+}
+
+void UInv_InventoryGrid::SwapStackCounts(const int32 ClickedStackCount, const int32 HoveredStackCount,
+                                         const int32 Index)
+{
+	UInv_GridSlot* GridSlot = GridSlots[Index];
+	GridSlot->SetStackCount(HoveredStackCount);
+
+	UInv_SlottedItem* ClickedSlottedItem = SlottedItems.FindChecked(Index);
+	ClickedSlottedItem->UpdateStackCount(HoveredStackCount);
+
+	HoverItem->UpdateStackCount(ClickedStackCount);
 }
 
 void UInv_InventoryGrid::ShowCursor()

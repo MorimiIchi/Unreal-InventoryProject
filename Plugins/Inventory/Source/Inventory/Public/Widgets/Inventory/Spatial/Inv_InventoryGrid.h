@@ -133,6 +133,8 @@ private:
 	bool ShouldSwapStackCounts(const int32 RoomInClickedSlot, const int32 HoveredStackCount,
 	                           const int32 MaxStackSize) const;
 
+	void SwapStackCounts(const int32 ClickedStackCount, const int32 HoveredStackCount, const int32 Index);
+
 	UPROPERTY(EditAnywhere, Category="Inventory")
 	TSubclassOf<UUserWidget> VisibleCursorWidgetClass;
 
