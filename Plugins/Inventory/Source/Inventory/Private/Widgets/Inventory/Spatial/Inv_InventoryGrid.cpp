@@ -577,6 +577,12 @@ void UInv_InventoryGrid::OnSlottedItemClicked(int32 GridIndex, const FPointerEve
 		const int32 MaxStackSize = StackableFragment->GetMaxStackSize();
 		const int32 RoomInClickedSlot = MaxStackSize - ClickedStackCount;
 		const int32 HoveredStackCount = HoverItem->GetStackCount();
+		// - 点击到的 Slot 是否没有空间？
+		if (RoomInClickedSlot == 0)
+		{
+			return;
+		}
+		
 		// - 我们应该交换二者的堆叠吗？
 		if (ShouldSwapStackCounts(RoomInClickedSlot, HoveredStackCount, MaxStackSize))
 		{
@@ -598,7 +604,6 @@ void UInv_InventoryGrid::OnSlottedItemClicked(int32 GridIndex, const FPointerEve
 			return;
 		}
 
-		// - 点击到的 Slot 是否没有空间？
 		return;
 	}
 	// 交换 HoverItem
