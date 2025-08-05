@@ -582,8 +582,13 @@ void UInv_InventoryGrid::OnSlottedItemClicked(int32 GridIndex, const FPointerEve
 		{
 			SwapStackCounts(ClickedStackCount, HoveredStackCount, GridIndex);
 		}
-		
+
 		// - 我们应该消耗掉 HoverItem 的堆叠吗？
+		if (ShouldConsumeHoverItemStacks(HoveredStackCount, RoomInClickedSlot))
+		{
+			ConsumeHoverItemStacks(ClickedStackCount, HoveredStackCount, GridIndex);
+		}
+
 		// - 我们应该向点击的道具添加堆叠吗？（并且不消耗 HoverItem）
 		// - 点击到的 Slot 是否没有空间？
 		return;
@@ -839,6 +844,28 @@ void UInv_InventoryGrid::SwapStackCounts(const int32 ClickedStackCount, const in
 	ClickedSlottedItem->UpdateStackCount(HoveredStackCount);
 
 	HoverItem->UpdateStackCount(ClickedStackCount);
+}
+
+bool UInv_InventoryGrid::ShouldConsumeHoverItemStacks(const int32 HoveredStackCount,
+                                                      const int32 RoomInClickedSlot) const
+{
+	return RoomInClickedSlot >= HoveredStackCount;
+}
+
+void UInv_InventoryGrid::ConsumeHoverItemStacks(const int32 ClickedStackCount, const int32 HoveredStackCount,
+                                                const int32 Index)
+{
+	const int32 NewClickedStackCount = ClickedStackCount + HoveredStackCount;
+
+	GridSlots[Index]->SetStackCount(NewClickedStackCount);
+	SlottedItems.FindChecked(Index)->UpdateStackCount(NewClickedStackCount);
+
+	ClearHoverItem();
+
+	const FInv_GridFragment* GridFragment = GridSlots[Index]->GetInventoryItem()->GetItemManifest().GetFragmentOfType<
+		FInv_GridFragment>();
+	const FIntPoint Dimensions = GridFragment ? GridFragment->GetGridSize() : FIntPoint(1, 1);
+	HighLightSlots(Index, Dimensions);
 }
 
 void UInv_InventoryGrid::ShowCursor()
